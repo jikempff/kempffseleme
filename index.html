@@ -37,7 +37,7 @@
       --sw:       40vw;
       --nav-size: clamp(1.8rem, 3.2vw, 3.8rem);
       --content-pad: clamp(32px, 4vw, 80px);
-      --bio-gap:  clamp(28px, 3vw, 48px);
+      --bio-gap:  clamp(14px, 1.5vw, 24px);
     }
 
     html, body {
@@ -159,7 +159,7 @@
     }
     .bio-photo {
       width: 100%;
-      height: calc(100vh - clamp(48px, 6vw, 72px));
+      height: calc(100vh - clamp(48px, 6vw, 120px));
       object-fit: cover;
       filter: grayscale(100%);
       display: block;
@@ -175,7 +175,7 @@
       display: grid;
       grid-template-columns: clamp(120px, 12vw, 200px) 1fr;
       align-items: center;
-      gap: clamp(20px, 3vw, 48px);
+      gap: clamp(12px, 1.5vw, 24px);
       padding: clamp(32px, 4vw, 64px) 0;
       border-bottom: 1px solid #efefef;
     }

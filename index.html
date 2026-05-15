@@ -171,17 +171,25 @@
 
     /* ── Enactments ── */
     .entry {
-      display: flex;
-      flex-direction: column;
-      gap: clamp(10px, 1.2vw, 18px);
-      padding: clamp(40px, 5vw, 80px) 0;
-      border-bottom: none;
+      display: grid;
+      grid-template-columns: clamp(120px, 12vw, 200px) 1fr;
+      align-items: center;
+      gap: clamp(20px, 3vw, 48px);
+      padding: clamp(32px, 4vw, 64px) 0;
+      border-bottom: 1px solid #efefef;
     }
-    .entry:first-child { padding-top: clamp(20px, 3vw, 48px); }
+    .entry:first-child { padding-top: 0; }
+    .entry:last-child { border-bottom: none; }
 
-    .entry-img { display: none; }
+    .entry-img {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    .entry-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    .entry-meta { display: flex; flex-direction: column; gap: clamp(8px, 1vw, 16px); }
+    .entry-meta { display: flex; flex-direction: column; gap: clamp(8px, 1vw, 16px); min-width: 0; }
 
     .entry-tag {
       font-size: clamp(0.72rem, 0.85vw, 1rem);
@@ -355,7 +363,7 @@
     <section class="page" id="enactments">
 
       <div class="entry">
-        <div class="entry-img"><img src="YOUR_IMAGE_1_URL" alt="Simulated Certainty"></div>
+        <div class="entry-img"><img src="assets/img-simulated-certainty.webp" alt="Simulated Certainty"></div>
         <div class="entry-meta">
           <span class="entry-tag">literature review</span>
           <div class="entry-title"><strong>Simulated Certainty:</strong> Architectural Knowledge from Models to Machine Learning Surrogates</div>
@@ -364,7 +372,7 @@
       </div>
 
       <div class="entry">
-        <div class="entry-img"><img src="YOUR_IMAGE_2_URL" alt="La arquitectura y su contexto gráfico"></div>
+        <div class="entry-img"><img src="assets/img-thesis.webp" alt="La arquitectura y su contexto gráfico"></div>
         <div class="entry-meta">
           <span class="entry-tag">thesis</span>
           <div class="entry-title"><strong>La arquitectura y su contexto gráfico.</strong> Procesos de digitalización</div>
@@ -373,7 +381,7 @@
       </div>
 
       <div class="entry">
-        <div class="entry-img"><img src="YOUR_IMAGE_3_URL" alt="Arquitectura neoandina"></div>
+        <div class="entry-img"><img src="assets/img-neoandina.webp" alt="Arquitectura neoandina"></div>
         <div class="entry-meta">
           <span class="entry-tag">article</span>
           <div class="entry-title"><strong>Arquitectura neoandina:</strong> Un debate abierto entre identidad y tradición</div>
@@ -382,7 +390,7 @@
       </div>
 
       <div class="entry">
-        <div class="entry-img"><img src="YOUR_IMAGE_4_URL" alt="El striptease simbólico"></div>
+        <div class="entry-img"><img src="assets/img-striptease.webp" alt="El striptease simbólico"></div>
         <div class="entry-meta">
           <span class="entry-tag">book review</span>
           <div class="entry-title"><strong>El striptease simbólico:</strong> Espejismos en la capital del entretenimiento</div>

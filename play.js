@@ -166,9 +166,9 @@ function createSunCity() {
   var buildings = [];
 
   // City grid: varied overlapping volumes per block (massing model)
-  var streetW = 12;
-  var gridCount = 8;
-  var blockW = 50, blockD = 50;
+  var streetW = 24;
+  var gridCount = 7;
+  var blockW = 40, blockD = 40;
   var totalW = gridCount * (blockW + streetW);
   var offX = -totalW / 2, offZ = -totalW / 2;
 
@@ -183,14 +183,14 @@ function createSunCity() {
         var sizeType = Math.random();
         var bw, bd;
         if (sizeType < 0.3) {
-          bw = 6 + Math.random() * 12; bd = 6 + Math.random() * 12;
+          bw = 5 + Math.random() * 10; bd = 5 + Math.random() * 10;
         } else if (sizeType < 0.6) {
-          bw = 14 + Math.random() * 16; bd = 8 + Math.random() * 12;
+          bw = 10 + Math.random() * 14; bd = 6 + Math.random() * 10;
         } else if (sizeType < 0.8) {
-          bw = 22 + Math.random() * 16; bd = 5 + Math.random() * 8;
+          bw = 16 + Math.random() * 14; bd = 4 + Math.random() * 6;
           if (Math.random() > 0.5) { var tmp = bw; bw = bd; bd = tmp; }
         } else {
-          bw = 16 + Math.random() * 20; bd = 16 + Math.random() * 20;
+          bw = 12 + Math.random() * 16; bd = 12 + Math.random() * 16;
         }
 
         var margin = 1;
@@ -200,7 +200,7 @@ function createSunCity() {
 
         var bx = bkCX + (Math.random() - 0.5) * 2 * maxOX;
         var bz = bkCZ + (Math.random() - 0.5) * 2 * maxOZ;
-        var bHeight = 8 + Math.random() * 50;
+        var bHeight = 8 + Math.random() * 35;
 
         buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
       }
@@ -260,7 +260,7 @@ function createSunCity() {
 
       var bld = buildings[i];
       var groundLen = bld.h / tanAlt;
-      if (groundLen > 40) groundLen = 40;
+      if (groundLen > 25) groundLen = 25;
       var sx = dirX * groundLen;
       var sz = dirZ * groundLen;
 

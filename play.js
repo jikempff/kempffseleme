@@ -47,7 +47,9 @@ window.nextToy = function() {
   startToy((currentToy + 1) % toys.length);
 };
 
-// === TOY 1: BRICK WALL (isometric orthographic, neverending) ===
+var GRID_EXTENT = 250;
+
+// === TOY 1: BRICK WALL (isometric, white fill + black outline, Y-axis rotation) ===
 function createBrickWall() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
@@ -63,29 +65,32 @@ function createBrickWall() {
   var bricks = [];
   var bw = 18, bh = 9, bd = 9, gap = 2;
   var cols = 60, rows = 60;
-  var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
+  var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
+  var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
 
-  function createWall() {
-    for (var row = 0; row < rows; row++) {
-      var offset = (row % 2) * (bw + gap) / 2;
-      for (var col = 0; col < cols; col++) {
-        var geo = new THREE.BoxGeometry(bw, bh, bd);
-        var edges = new THREE.EdgesGeometry(geo);
-        var line = new THREE.LineSegments(edges, lineMat);
-        line.position.x = col * (bw + gap) + offset - (cols * (bw + gap)) / 2;
-        line.position.y = row * (bh + gap) - (rows * (bh + gap)) / 2;
-        line.position.z = 0;
-        line.userData.baseX = line.position.x;
-        line.userData.baseY = line.position.y;
-        line.userData.col = col;
-        line.userData.row = row;
-        line.userData.rotZ = 0;
-        scene.add(line);
-        bricks.push(line);
-      }
+  for (var row = 0; row < rows; row++) {
+    var offset = (row % 2) * (bw + gap) / 2;
+    for (var col = 0; col < cols; col++) {
+      var geo = new THREE.BoxGeometry(bw, bh, bd);
+      var fill = new THREE.Mesh(geo, fillMat);
+      var edges = new THREE.EdgesGeometry(geo);
+      var outline = new THREE.LineSegments(edges, lineMat);
+
+      var group = new THREE.Group();
+      group.add(fill);
+      group.add(outline);
+      group.position.x = col * (bw + gap) + offset - (cols * (bw + gap)) / 2;
+      group.position.y = row * (bh + gap) - (rows * (bh + gap)) / 2;
+      group.position.z = 0;
+      group.userData.baseX = group.position.x;
+      group.userData.baseY = group.position.y;
+      group.userData.col = col;
+      group.userData.row = row;
+      group.userData.rotY = 0;
+      scene.add(group);
+      bricks.push(group);
     }
   }
-  createWall();
 
   function animate() {
     animId = requestAnimationFrame(animate);
@@ -105,8 +110,8 @@ function createBrickWall() {
       var radius = 60;
       var influence = Math.max(0, 1 - dist / radius);
       var targetRot = influence * Math.PI * 0.5;
-      b.userData.rotZ += (targetRot - b.userData.rotZ) * 0.08;
-      b.rotation.z = b.userData.rotZ;
+      b.userData.rotY += (targetRot - b.userData.rotY) * 0.08;
+      b.rotation.y = b.userData.rotY;
     }
 
     cam.left = -frustum * a2;
@@ -139,7 +144,7 @@ function convexHull(points) {
 }
 function cross(o, a, b) { return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }
 
-// === TOY 2: SUN & CITY (top-down, vector shadows, outlines) ===
+// === TOY 2: SUN & CITY (top-down, vector shadows fully black, white fill + outline) ===
 function createSunCity() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
@@ -154,8 +159,6 @@ function createSunCity() {
   cam.lookAt(0, 0, 0);
 
   var buildings = [];
-  var shadows = [];
-  var outlines = [];
 
   var blocks = [];
   var streetW = 8;
@@ -173,9 +176,12 @@ function createSunCity() {
     }
   }
 
-  var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
-  var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.15 });
+  var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
   var buildingFillMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+
+  var buildingGroup = new THREE.Group();
+  buildingGroup.renderOrder = 2;
+  scene.add(buildingGroup);
 
   for (var b = 0; b < blocks.length; b++) {
     var block = blocks[b];
@@ -192,30 +198,36 @@ function createSunCity() {
       var fillGeo = new THREE.PlaneGeometry(bw, bd);
       var fill = new THREE.Mesh(fillGeo, buildingFillMat);
       fill.rotation.x = -Math.PI / 2;
-      fill.position.set(bx, 2, bz);
-      scene.add(fill);
+      fill.position.set(bx, 4, bz);
+      buildingGroup.add(fill);
 
       var outlineGeo = new THREE.PlaneGeometry(bw, bd);
       var edgesGeo = new THREE.EdgesGeometry(outlineGeo);
       var outline = new THREE.LineSegments(edgesGeo, lineMat);
       outline.rotation.x = -Math.PI / 2;
-      outline.position.set(bx, 3, bz);
-      scene.add(outline);
-      outlines.push(outline);
+      outline.position.set(bx, 5, bz);
+      buildingGroup.add(outline);
     }
   }
 
   var shadowGroup = new THREE.Group();
-  shadowGroup.position.y = 0.5;
+  shadowGroup.renderOrder = 1;
   scene.add(shadowGroup);
+
+  var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000' });
 
   function updateShadows(sunDirX, sunDirZ) {
     while (shadowGroup.children.length > 0) {
-      shadowGroup.remove(shadowGroup.children[0]);
+      var child = shadowGroup.children[0];
+      shadowGroup.remove(child);
+      if (child.geometry) child.geometry.dispose();
     }
 
     var len = Math.sqrt(sunDirX * sunDirX + sunDirZ * sunDirZ);
     if (len < 0.01) return;
+
+    var mergedShape = new THREE.Shape();
+    var first = true;
 
     for (var i = 0; i < buildings.length; i++) {
       var bld = buildings[i];
@@ -231,7 +243,6 @@ function createSunCity() {
         [bld.x - hw, bld.z + hd]
       ];
       var shifted = corners.map(function(c) { return [c[0] + sx, c[1] + sz]; });
-
       var all = corners.concat(shifted);
       var hull = convexHull(all);
 
@@ -243,7 +254,7 @@ function createSunCity() {
       var geo = new THREE.ShapeGeometry(shape);
       var mesh = new THREE.Mesh(geo, shadowMat);
       mesh.rotation.x = -Math.PI / 2;
-      mesh.position.y = 0.5;
+      mesh.position.y = 1;
       shadowGroup.add(mesh);
     }
   }
@@ -272,12 +283,10 @@ function createSunCity() {
   createSunCity.cleanup = function() {
     scene.clear();
     buildings.length = 0;
-    shadows.length = 0;
-    outlines.length = 0;
   };
 }
 
-// === TOY 3: WAVE GRID (isometric orthographic) ===
+// === TOY 3: WAVE GRID (isometric, white fill + black outline) ===
 function createWaveGrid() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
@@ -292,24 +301,31 @@ function createWaveGrid() {
   cam.lookAt(0, 0, 0);
 
   var gridN = 50;
-  var spacing = 10;
+  var spacing = GRID_EXTENT * 2 / gridN;
   var columns = [];
-  var startOff = -(gridN - 1) * spacing / 2;
+  var startOff = -GRID_EXTENT;
+  var cubeSize = spacing * 0.75;
 
-  var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
+  var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
+  var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
 
   for (var gx = 0; gx < gridN; gx++) {
     for (var gz = 0; gz < gridN; gz++) {
-      var geo = new THREE.BoxGeometry(7, 7, 7);
+      var geo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+      var fill = new THREE.Mesh(geo, fillMat);
       var edges = new THREE.EdgesGeometry(geo);
-      var line = new THREE.LineSegments(edges, lineMat);
-      line.position.x = startOff + gx * spacing;
-      line.position.z = startOff + gz * spacing;
-      line.userData.gx = gx;
-      line.userData.gz = gz;
-      line.userData.targetY = 0;
-      scene.add(line);
-      columns.push(line);
+      var outline = new THREE.LineSegments(edges, lineMat);
+
+      var group = new THREE.Group();
+      group.add(fill);
+      group.add(outline);
+      group.position.x = startOff + gx * spacing + spacing / 2;
+      group.position.z = startOff + gz * spacing + spacing / 2;
+      group.userData.gx = gx;
+      group.userData.gz = gz;
+      group.userData.targetY = 0;
+      scene.add(group);
+      columns.push(group);
     }
   }
 
@@ -348,25 +364,25 @@ function createWaveGrid() {
   createWaveGrid.cleanup = function() { scene.clear(); columns.length = 0; };
 }
 
-// === TOY 4: DYNAMIC RELAXATION MESH (isometric, slider controls load) ===
+// === TOY 4: DYNAMIC RELAXATION MESH (isometric, matched domain with wave) ===
 function createRelaxMesh() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
 
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var frustum = 200;
+  var frustum = 220;
   var aspect = w / h;
   var cam = new THREE.OrthographicCamera(
     -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
   );
-  cam.position.set(250, 250, 250);
+  cam.position.set(300, 300, 300);
   cam.lookAt(0, 0, 0);
 
   var gridN = 28;
-  var restLength = 12;
+  var restLength = GRID_EXTENT * 2 / (gridN - 1);
   var nodes = [];
   var springs = [];
-  var startOff = -(gridN - 1) * restLength / 2;
+  var startOff = -GRID_EXTENT;
   var load = 0.5;
 
   for (var i = 0; i < gridN; i++) {
@@ -397,18 +413,6 @@ function createRelaxMesh() {
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
   var lineMesh = new THREE.LineSegments(lineGeo, lineMat);
   scene.add(lineMesh);
-
-  var boundaryPositions = [];
-  for (var i = 0; i < gridN - 1; i++) {
-    boundaryPositions.push(startOff + i * restLength, 0, startOff);
-    boundaryPositions.push(startOff + (i+1) * restLength, 0, startOff);
-    boundaryPositions.push(startOff + i * restLength, 0, startOff + (gridN-1)*restLength);
-    boundaryPositions.push(startOff + (i+1) * restLength, 0, startOff + (gridN-1)*restLength);
-    boundaryPositions.push(startOff, 0, startOff + i * restLength);
-    boundaryPositions.push(startOff, 0, startOff + (i+1) * restLength);
-    boundaryPositions.push(startOff + (gridN-1)*restLength, 0, startOff + i * restLength);
-    boundaryPositions.push(startOff + (gridN-1)*restLength, 0, startOff + (i+1) * restLength);
-  }
 
   sliderEl = document.createElement('input');
   sliderEl.type = 'range';

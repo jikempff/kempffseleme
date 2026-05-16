@@ -31,20 +31,38 @@ function resize() {
   renderer.setSize(w, h, false);
 }
 
+var toyNames = ['bricks', 'shadows', 'wave', 'mesh', 'l-system', 'swarm'];
+var toyInstructions = [
+  'move cursor to rotate bricks',
+  'move cursor to change sun angle',
+  'move cursor to create waves',
+  'drag slider to adjust load',
+  'click to grow tree',
+  'move cursor to attract swarm'
+];
+
 function startToy(index) {
   if (animId) cancelAnimationFrame(animId);
   if (toys[currentToy] && toys[currentToy].cleanup) toys[currentToy].cleanup();
   currentToy = index;
-  var label = document.querySelector('.play-switch-label');
-  var names = ['bricks', 'shadows', 'wave', 'mesh', 'l-system', 'swarm'];
+  var nextLabel = document.querySelector('.play-switch-label-next');
+  var prevLabel = document.querySelector('.play-switch-label-prev');
+  var instrEl = document.getElementById('play-instructions');
   var next = (index + 1) % toys.length;
-  if (label) label.textContent = names[next];
+  var prev = (index - 1 + toys.length) % toys.length;
+  if (nextLabel) nextLabel.textContent = toyNames[next];
+  if (prevLabel) prevLabel.textContent = toyNames[prev];
+  if (instrEl) instrEl.textContent = toyInstructions[index];
   if (sliderEl) { sliderEl.remove(); sliderEl = null; }
   toys[index]();
 }
 
 window.nextToy = function() {
   startToy((currentToy + 1) % toys.length);
+};
+
+window.prevToy = function() {
+  startToy((currentToy - 1 + toys.length) % toys.length);
 };
 
 var GRID_EXTENT = 250;
@@ -112,7 +130,7 @@ function createBrickWall() {
       var dx = b.userData.baseX - mx;
       var dy = b.userData.baseY - my;
       var dist = Math.sqrt(dx * dx + dy * dy);
-      var radius = 60;
+      var radius = 120;
       var influence = Math.max(0, 1 - dist / radius);
       var targetRot = influence * Math.PI * 0.5;
       b.userData.rotY += (targetRot - b.userData.rotY) * 0.08;
@@ -449,7 +467,7 @@ function createWaveGrid() {
       var dx = c.userData.gx - mx;
       var dz = c.userData.gz - my;
       var dist = Math.sqrt(dx * dx + dz * dz);
-      var wave = Math.sin(dist * 0.4 - time * 3) * Math.max(0, 1 - dist / 20) * 50;
+      var wave = Math.sin(dist * 0.3 - time * 3) * Math.max(0, 1 - dist / 35) * 60;
       var ambient = Math.sin(c.userData.gx * 0.3 + time) * Math.cos(c.userData.gz * 0.3 + time * 0.7) * 6;
       c.userData.targetY = wave + ambient;
       c.position.y += (c.userData.targetY - c.position.y) * 0.1;

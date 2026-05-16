@@ -149,7 +149,7 @@ function convexHull(points) {
 }
 function cross(o, a, b) { return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }
 
-// === TOY 2: SUN & CITY (top-down, ground-plane shadows, height-aware layering) ===
+// === TOY 2: SUN & CITY (top-down, single-polygon buildings, proper shadows) ===
 function createSunCity() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
@@ -163,12 +163,60 @@ function createSunCity() {
   cam.position.set(0, 500, 0);
   cam.lookAt(0, 0, 0);
 
-  var buildings = [];
+  // Generate a building footprint as a single polygon (L, T, U, or rect)
+  function genFootprint(cx, cz, maxW, maxD) {
+    var type = Math.floor(Math.random() * 5);
+    var pts = [];
+    if (type <= 1) {
+      // Rectangle
+      var bw = 8 + Math.random() * (maxW - 8);
+      var bd = 6 + Math.random() * (maxD - 6);
+      pts = [[-bw/2,-bd/2],[bw/2,-bd/2],[bw/2,bd/2],[-bw/2,bd/2]];
+    } else if (type === 2) {
+      // L-shape
+      var bw = 14 + Math.random() * (maxW - 14);
+      var bd = 14 + Math.random() * (maxD - 14);
+      var cw = bw * (0.35 + Math.random() * 0.3);
+      var cd = bd * (0.35 + Math.random() * 0.3);
+      pts = [
+        [-bw/2, -bd/2], [bw/2, -bd/2], [bw/2, bd/2 - cd],
+        [-bw/2 + (bw - cw), bd/2 - cd], [-bw/2 + (bw - cw), bd/2], [-bw/2, bd/2]
+      ];
+    } else if (type === 3) {
+      // T-shape
+      var bw = 16 + Math.random() * (maxW - 16);
+      var bd = 16 + Math.random() * (maxD - 16);
+      var stemW = bw * (0.3 + Math.random() * 0.25);
+      var barD = bd * (0.25 + Math.random() * 0.2);
+      pts = [
+        [-bw/2, bd/2 - barD], [-bw/2, bd/2], [bw/2, bd/2], [bw/2, bd/2 - barD],
+        [stemW/2, bd/2 - barD], [stemW/2, -bd/2],
+        [-stemW/2, -bd/2], [-stemW/2, bd/2 - barD]
+      ];
+    } else {
+      // U-shape
+      var bw = 14 + Math.random() * (maxW - 14);
+      var bd = 14 + Math.random() * (maxD - 14);
+      var iw = bw * (0.3 + Math.random() * 0.25);
+      var id = bd * (0.3 + Math.random() * 0.25);
+      pts = [
+        [-bw/2, -bd/2], [bw/2, -bd/2], [bw/2, bd/2],
+        [iw/2, bd/2], [iw/2, bd/2 - id], [-iw/2, bd/2 - id],
+        [-iw/2, bd/2], [-bw/2, bd/2]
+      ];
+    }
+    // Random 90° rotation
+    var rot = Math.floor(Math.random() * 4);
+    for (var r = 0; r < rot; r++) {
+      pts = pts.map(function(p) { return [-p[1], p[0]]; });
+    }
+    return pts.map(function(p) { return [p[0] + cx, p[1] + cz]; });
+  }
 
-  // City grid: varied overlapping volumes per block (massing model)
-  var streetW = 24;
-  var gridCount = 7;
-  var blockW = 40, blockD = 40;
+  var buildings = [];
+  var streetW = 20;
+  var gridCount = 8;
+  var blockW = 36, blockD = 36;
   var totalW = gridCount * (blockW + streetW);
   var offX = -totalW / 2, offZ = -totalW / 2;
 
@@ -176,44 +224,12 @@ function createSunCity() {
     for (var bj = 0; bj < gridCount; bj++) {
       var bkCX = offX + bi * (blockW + streetW) + blockW / 2;
       var bkCZ = offZ + bj * (blockD + streetW) + blockD / 2;
-
-      // 1-3 overlapping volumes per block
-      var numVols = 1 + Math.floor(Math.random() * 3);
-      for (var v = 0; v < numVols; v++) {
-        var sizeType = Math.random();
-        var bw, bd;
-        if (sizeType < 0.3) {
-          bw = 5 + Math.random() * 10; bd = 5 + Math.random() * 10;
-        } else if (sizeType < 0.6) {
-          bw = 10 + Math.random() * 14; bd = 6 + Math.random() * 10;
-        } else if (sizeType < 0.8) {
-          bw = 16 + Math.random() * 14; bd = 4 + Math.random() * 6;
-          if (Math.random() > 0.5) { var tmp = bw; bw = bd; bd = tmp; }
-        } else {
-          bw = 12 + Math.random() * 16; bd = 12 + Math.random() * 16;
-        }
-
-        var margin = 1;
-        var maxOX = (blockW - bw) / 2 - margin;
-        var maxOZ = (blockD - bd) / 2 - margin;
-        if (maxOX < 0 || maxOZ < 0) continue;
-
-        var bx = bkCX + (Math.random() - 0.5) * 2 * maxOX;
-        var bz = bkCZ + (Math.random() - 0.5) * 2 * maxOZ;
-        var bHeight = 8 + Math.random() * 35;
-
-        buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
-      }
+      if (Math.random() < 0.08) continue; // occasional empty block
+      var pts = genFootprint(bkCX, bkCZ, blockW - 4, blockD - 4);
+      var bHeight = 8 + Math.random() * 40;
+      buildings.push({ pts: pts, h: bHeight });
     }
   }
-
-  // Three layers, all depthTest off, using renderOrder:
-  //   Layer 0: ALL shadows (ground plane, black)
-  //   Layer 1: ALL building fills (white, cover shadows where buildings sit)
-  //   Layer 2: ALL building outlines (black edges on top)
-  // Buildings sorted by height so taller ones' fills cover shorter ones.
-
-  buildings.sort(function(a, b) { return a.h - b.h; });
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', depthTest: false });
   var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false });
@@ -224,24 +240,34 @@ function createSunCity() {
 
   for (var i = 0; i < n; i++) {
     var bld = buildings[i];
+    var pts = bld.pts;
 
-    // Fill: renderOrder n + i (all fills after all shadows, sorted by height)
-    var fillGeo = new THREE.PlaneGeometry(bld.w, bld.d);
+    // Fill from polygon
+    var fillShape = new THREE.Shape();
+    fillShape.moveTo(pts[0][0], pts[0][1]);
+    for (var p = 1; p < pts.length; p++) fillShape.lineTo(pts[p][0], pts[p][1]);
+    fillShape.closePath();
+    var fillGeo = new THREE.ShapeGeometry(fillShape);
     var fill = new THREE.Mesh(fillGeo, fillMat);
     fill.rotation.x = -Math.PI / 2;
-    fill.position.set(bld.x, 0, bld.z);
+    fill.position.y = 0;
     fill.renderOrder = n + i;
     scene.add(fill);
 
-    // Outline: renderOrder 2*n + i (all outlines after all fills)
-    var edgesGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(bld.w, bld.d));
-    var outline = new THREE.LineSegments(edgesGeo, lineMat);
+    // Outline from polygon edges
+    var lineVerts = [];
+    for (var p = 0; p < pts.length; p++) {
+      var p2 = (p + 1) % pts.length;
+      lineVerts.push(pts[p][0], pts[p][1], 0, pts[p2][0], pts[p2][1], 0);
+    }
+    var lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineVerts, 3));
+    var outline = new THREE.LineSegments(lineGeo, lineMat);
     outline.rotation.x = -Math.PI / 2;
-    outline.position.set(bld.x, 0, bld.z);
+    outline.position.y = 0;
     outline.renderOrder = 2 * n + i;
     scene.add(outline);
 
-    // Shadow: renderOrder i (all shadows first, sorted by height)
     shadowMeshes.push({ mesh: null, order: i });
   }
 
@@ -264,15 +290,10 @@ function createSunCity() {
       var sx = dirX * groundLen;
       var sz = dirZ * groundLen;
 
-      var hw = bld.w / 2, hd = bld.d / 2;
-      var corners = [
-        [bld.x - hw, bld.z - hd],
-        [bld.x + hw, bld.z - hd],
-        [bld.x + hw, bld.z + hd],
-        [bld.x - hw, bld.z + hd]
-      ];
-      var shifted = corners.map(function(c) { return [c[0] + sx, c[1] + sz]; });
-      var hull = convexHull(corners.concat(shifted));
+      // Shadow = convex hull of footprint + shifted footprint
+      var pts = bld.pts;
+      var shifted = pts.map(function(p) { return [p[0] + sx, p[1] + sz]; });
+      var hull = convexHull(pts.concat(shifted));
 
       var shape = new THREE.Shape();
       shape.moveTo(hull[0][0], hull[0][1]);

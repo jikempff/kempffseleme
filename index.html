@@ -452,17 +452,25 @@
 
   function handleSubmit(e) {
     e.preventDefault();
-    /*
-      To wire up the form, sign up at formspree.io, create a form,
-      and replace YOUR_FORM_ID below. Then remove the alert.
-
-      fetch('https://formspree.io/f/YOUR_FORM_ID', {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: new FormData(document.querySelector('.contact-form'))
-      });
-    */
-    alert('Connect your form backend (see comment in handleSubmit).');
+    const btn = e.target;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    fetch('https://formspree.io/f/xpqbvnlj', {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      body: new FormData(document.querySelector('.contact-form'))
+    }).then(r => {
+      if (r.ok) {
+        btn.textContent = 'Sent';
+        document.querySelector('.contact-form').reset();
+      } else {
+        btn.textContent = 'Error — try again';
+        btn.disabled = false;
+      }
+    }).catch(() => {
+      btn.textContent = 'Error — try again';
+      btn.disabled = false;
+    });
   }
 </script>
 </body>

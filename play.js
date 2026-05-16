@@ -66,7 +66,12 @@ function createBrickWall() {
   var bw = 18, bh = 9, bd = 9, gap = 2;
   var cols = 60, rows = 60;
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
-  var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+  var fillMat = new THREE.MeshBasicMaterial({
+    color: '#ffffff',
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1
+  });
 
   for (var row = 0; row < rows; row++) {
     var offset = (row % 2) * (bw + gap) / 2;
@@ -214,7 +219,7 @@ function createSunCity() {
   shadowGroup.renderOrder = 1;
   scene.add(shadowGroup);
 
-  var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000' });
+  var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', depthWrite: false });
 
   function updateShadows(sunDirX, sunDirZ) {
     while (shadowGroup.children.length > 0) {
@@ -307,7 +312,12 @@ function createWaveGrid() {
   var cubeSize = spacing * 0.75;
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
-  var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+  var fillMat = new THREE.MeshBasicMaterial({
+    color: '#ffffff',
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1
+  });
 
   for (var gx = 0; gx < gridN; gx++) {
     for (var gz = 0; gz < gridN; gz++) {

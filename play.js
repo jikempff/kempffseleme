@@ -152,7 +152,7 @@ function cross(o, a, b) { return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0])
 // === TOY 2: SUN & CITY (top-down, single-polygon buildings, proper shadows) ===
 function createSunCity() {
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color('#cccccc'); // TEMP gray to debug fills
+  scene.background = new THREE.Color('#ffffff');
 
   var w = canvas.clientWidth, h = canvas.clientHeight;
   var frustum = 250;

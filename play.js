@@ -268,7 +268,56 @@ function createSunCity() {
     outline.renderOrder = 2 * n + i;
     scene.add(outline);
 
-    shadowMeshes.push({ mesh: null, order: i });
+    shadowMeshes.push({ group: null, order: i });
+  }
+
+  // Build shadow as Minkowski sum: original footprint + shifted footprint + edge quads
+  function buildShadowGroup(pts, sx, sz, order) {
+    var grp = new THREE.Group();
+    grp.renderOrder = order;
+
+    // Original footprint
+    var s1 = new THREE.Shape();
+    s1.moveTo(pts[0][0], pts[0][1]);
+    for (var k = 1; k < pts.length; k++) s1.lineTo(pts[k][0], pts[k][1]);
+    s1.closePath();
+    var m1 = new THREE.Mesh(new THREE.ShapeGeometry(s1), shadowMat);
+    m1.rotation.x = -Math.PI / 2;
+    m1.renderOrder = order;
+    grp.add(m1);
+
+    // Shifted footprint
+    var s2 = new THREE.Shape();
+    s2.moveTo(pts[0][0] + sx, pts[0][1] + sz);
+    for (var k = 1; k < pts.length; k++) s2.lineTo(pts[k][0] + sx, pts[k][1] + sz);
+    s2.closePath();
+    var m2 = new THREE.Mesh(new THREE.ShapeGeometry(s2), shadowMat);
+    m2.rotation.x = -Math.PI / 2;
+    m2.renderOrder = order;
+    grp.add(m2);
+
+    // Edge quads connecting original to shifted
+    for (var k = 0; k < pts.length; k++) {
+      var k2 = (k + 1) % pts.length;
+      var qs = new THREE.Shape();
+      qs.moveTo(pts[k][0], pts[k][1]);
+      qs.lineTo(pts[k2][0], pts[k2][1]);
+      qs.lineTo(pts[k2][0] + sx, pts[k2][1] + sz);
+      qs.lineTo(pts[k][0] + sx, pts[k][1] + sz);
+      qs.closePath();
+      var qm = new THREE.Mesh(new THREE.ShapeGeometry(qs), shadowMat);
+      qm.rotation.x = -Math.PI / 2;
+      qm.renderOrder = order;
+      grp.add(qm);
+    }
+
+    return grp;
+  }
+
+  function disposeShadowGroup(grp) {
+    for (var c = 0; c < grp.children.length; c++) {
+      grp.children[c].geometry.dispose();
+    }
   }
 
   function updateShadows(azimuth, altitude) {
@@ -278,10 +327,10 @@ function createSunCity() {
     if (tanAlt < 0.3) tanAlt = 0.3;
 
     for (var i = 0; i < n; i++) {
-      if (shadowMeshes[i].mesh) {
-        scene.remove(shadowMeshes[i].mesh);
-        shadowMeshes[i].mesh.geometry.dispose();
-        shadowMeshes[i].mesh = null;
+      if (shadowMeshes[i].group) {
+        scene.remove(shadowMeshes[i].group);
+        disposeShadowGroup(shadowMeshes[i].group);
+        shadowMeshes[i].group = null;
       }
 
       var bld = buildings[i];
@@ -290,23 +339,9 @@ function createSunCity() {
       var sx = dirX * groundLen;
       var sz = dirZ * groundLen;
 
-      // Shadow = convex hull of footprint + shifted footprint
-      var pts = bld.pts;
-      var shifted = pts.map(function(p) { return [p[0] + sx, p[1] + sz]; });
-      var hull = convexHull(pts.concat(shifted));
-
-      var shape = new THREE.Shape();
-      shape.moveTo(hull[0][0], hull[0][1]);
-      for (var hi = 1; hi < hull.length; hi++) shape.lineTo(hull[hi][0], hull[hi][1]);
-      shape.closePath();
-
-      var geo = new THREE.ShapeGeometry(shape);
-      var mesh = new THREE.Mesh(geo, shadowMat);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.position.y = 0;
-      mesh.renderOrder = shadowMeshes[i].order;
-      scene.add(mesh);
-      shadowMeshes[i].mesh = mesh;
+      var grp = buildShadowGroup(bld.pts, sx, sz, shadowMeshes[i].order);
+      scene.add(grp);
+      shadowMeshes[i].group = grp;
     }
   }
 
@@ -332,6 +367,9 @@ function createSunCity() {
   animate();
 
   createSunCity.cleanup = function() {
+    for (var i = 0; i < shadowMeshes.length; i++) {
+      if (shadowMeshes[i].group) disposeShadowGroup(shadowMeshes[i].group);
+    }
     scene.clear();
     buildings.length = 0;
     shadowMeshes.length = 0;

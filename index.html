@@ -404,34 +404,35 @@
     </section>
 
     <section class="page" id="contact">
-      <div class="contact-form">
+      <form class="contact-form" action="https://formspree.io/f/xpqbvnlj" method="POST">
+        <input type="hidden" name="_next" value="https://kempffsele.me">
         <div class="form-group">
           <div class="form-label">name</div>
           <div class="form-row">
             <div>
               <label class="form-label">First Name <span class="req">(required)</span></label>
-              <input type="text" name="first_name" autocomplete="given-name">
+              <input type="text" name="first_name" required autocomplete="given-name">
             </div>
             <div>
               <label class="form-label">Last Name <span class="req">(required)</span></label>
-              <input type="text" name="last_name" autocomplete="family-name">
+              <input type="text" name="last_name" required autocomplete="family-name">
             </div>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">email address <span class="req">(required)</span></label>
-          <input type="email" name="email" autocomplete="email">
+          <input type="email" name="email" required autocomplete="email">
         </div>
         <div class="form-group">
           <label class="form-label">subject <span class="req">(required)</span></label>
-          <input type="text" name="subject">
+          <input type="text" name="_subject" required>
         </div>
         <div class="form-group">
           <label class="form-label">message <span class="req">(required)</span></label>
-          <textarea name="message"></textarea>
+          <textarea name="message" required></textarea>
         </div>
-        <div class="form-submit-row"><button class="btn-submit" onclick="handleSubmit(event)">Submit</button></div>
-      </div>
+        <div class="form-submit-row"><button type="submit" class="btn-submit">Submit</button></div>
+      </form>
     </section>
 
   </main>
@@ -450,28 +451,6 @@
     });
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    const btn = e.target;
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-    fetch('https://formspree.io/f/xpqbvnlj', {
-      method: 'POST',
-      headers: { Accept: 'application/json' },
-      body: new FormData(document.querySelector('.contact-form'))
-    }).then(r => {
-      if (r.ok) {
-        btn.textContent = 'Sent';
-        document.querySelector('.contact-form').reset();
-      } else {
-        btn.textContent = 'Error — try again';
-        btn.disabled = false;
-      }
-    }).catch(() => {
-      btn.textContent = 'Error — try again';
-      btn.disabled = false;
-    });
-  }
 </script>
 </body>
 </html>

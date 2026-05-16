@@ -34,7 +34,7 @@ function resize() {
 var toyNames = ['bricks', 'shadows', 'wave', 'mesh', 'l-system', 'swarm'];
 var toyInstructions = [
   'move cursor to rotate bricks',
-  'move cursor to change sun angle',
+  'x-axis: sun azimuth · y-axis: solar altitude',
   'move cursor to create waves',
   'drag slider to adjust load',
   'click to grow tree',

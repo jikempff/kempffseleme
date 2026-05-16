@@ -725,8 +725,10 @@ function hookShowPage() {
   window.showPage = function(id) {
     origShowPage(id);
     if (id === 'play') {
-      if (!renderer) initPlay();
-      else startToy(currentToy);
+      setTimeout(function() {
+        if (!renderer) initPlay();
+        else startToy(currentToy);
+      }, 0);
     } else {
       if (animId) { cancelAnimationFrame(animId); animId = null; }
     }

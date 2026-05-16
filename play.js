@@ -165,54 +165,68 @@ function createSunCity() {
 
   var buildings = [];
 
-  var blocks = [];
+  // City grid: non-overlapping buildings packed within blocks
   var streetW = 8;
   var gridCount = 10;
   var blockW = 42, blockD = 42;
   var totalW = gridCount * (blockW + streetW);
   var offX = -totalW / 2, offZ = -totalW / 2;
+
   for (var bi = 0; bi < gridCount; bi++) {
     for (var bj = 0; bj < gridCount; bj++) {
-      blocks.push({
-        x: offX + bi * (blockW + streetW) + blockW / 2,
-        z: offZ + bj * (blockD + streetW) + blockD / 2,
-        w: blockW, d: blockD
-      });
+      var bkX = offX + bi * (blockW + streetW);
+      var bkZ = offZ + bj * (blockD + streetW);
+      // Subdivide each block into a 2x2 grid of lots with small gaps
+      var lotGap = 2;
+      var lotW = (blockW - lotGap) / 2;
+      var lotD = (blockD - lotGap) / 2;
+      for (var li = 0; li < 2; li++) {
+        for (var lj = 0; lj < 2; lj++) {
+          if (Math.random() < 0.15) continue; // some empty lots
+          var lotX = bkX + li * (lotW + lotGap);
+          var lotZ = bkZ + lj * (lotD + lotGap);
+          // Building fills most of the lot with small setback
+          var setback = 1 + Math.random() * 2;
+          var bw = lotW - setback * 2;
+          var bd = lotD - setback * 2;
+          if (bw < 4 || bd < 4) continue;
+          var bHeight = 15 + Math.random() * 80;
+          var bx = lotX + lotW / 2;
+          var bz = lotZ + lotD / 2;
+          buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
+        }
+      }
     }
   }
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
-  var buildingFillMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+  var buildingFillMat = new THREE.MeshBasicMaterial({
+    color: '#ffffff',
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+    depthWrite: true
+  });
 
   var buildingGroup = new THREE.Group();
   buildingGroup.renderOrder = 2;
   scene.add(buildingGroup);
 
-  for (var b = 0; b < blocks.length; b++) {
-    var block = blocks[b];
-    var numB = 2 + Math.floor(Math.random() * 3);
-    for (var i = 0; i < numB; i++) {
-      var bw = 8 + Math.random() * (block.w * 0.5);
-      var bd = 8 + Math.random() * (block.d * 0.5);
-      var bHeight = 20 + Math.random() * 180;
-      var bx = block.x + (Math.random() - 0.5) * (block.w - bw) * 0.7;
-      var bz = block.z + (Math.random() - 0.5) * (block.d - bd) * 0.7;
+  for (var b = 0; b < buildings.length; b++) {
+    var bld = buildings[b];
 
-      buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
+    var fillGeo = new THREE.PlaneGeometry(bld.w, bld.d);
+    var fill = new THREE.Mesh(fillGeo, buildingFillMat);
+    fill.rotation.x = -Math.PI / 2;
+    fill.position.set(bld.x, 4 + b * 0.01, bld.z);
+    buildingGroup.add(fill);
 
-      var fillGeo = new THREE.PlaneGeometry(bw, bd);
-      var fill = new THREE.Mesh(fillGeo, buildingFillMat);
-      fill.rotation.x = -Math.PI / 2;
-      fill.position.set(bx, 4, bz);
-      buildingGroup.add(fill);
-
-      var outlineGeo = new THREE.PlaneGeometry(bw, bd);
-      var edgesGeo = new THREE.EdgesGeometry(outlineGeo);
-      var outline = new THREE.LineSegments(edgesGeo, lineMat);
-      outline.rotation.x = -Math.PI / 2;
-      outline.position.set(bx, 5, bz);
-      buildingGroup.add(outline);
-    }
+    var outlineGeo = new THREE.PlaneGeometry(bld.w, bld.d);
+    var edgesGeo = new THREE.EdgesGeometry(outlineGeo);
+    var outline = new THREE.LineSegments(edgesGeo, lineMat);
+    outline.rotation.x = -Math.PI / 2;
+    outline.position.set(bld.x, 5 + b * 0.01, bld.z);
+    buildingGroup.add(outline);
   }
 
   var shadowGroup = new THREE.Group();
@@ -221,24 +235,27 @@ function createSunCity() {
 
   var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', depthWrite: false });
 
-  function updateShadows(sunDirX, sunDirZ) {
+  function updateShadows(azimuth, altitude) {
     while (shadowGroup.children.length > 0) {
       var child = shadowGroup.children[0];
       shadowGroup.remove(child);
       if (child.geometry) child.geometry.dispose();
     }
 
-    var len = Math.sqrt(sunDirX * sunDirX + sunDirZ * sunDirZ);
-    if (len < 0.01) return;
-
-    var mergedShape = new THREE.Shape();
-    var first = true;
+    // Shadow direction from azimuth, length from altitude
+    var dirX = Math.cos(azimuth);
+    var dirZ = Math.sin(azimuth);
+    // altitude: high sun = short shadow, low sun = long shadow
+    var tanAlt = Math.tan(altitude);
+    if (tanAlt < 0.05) tanAlt = 0.05;
 
     for (var i = 0; i < buildings.length; i++) {
       var bld = buildings[i];
-      var shadowLen = bld.h * 0.5;
-      var sx = (sunDirX / len) * shadowLen;
-      var sz = (sunDirZ / len) * shadowLen;
+      var shadowLen = bld.h / tanAlt;
+      // Clamp shadow length to something reasonable
+      if (shadowLen > 120) shadowLen = 120;
+      var sx = dirX * shadowLen;
+      var sz = dirZ * shadowLen;
 
       var hw = bld.w / 2, hd = bld.d / 2;
       var corners = [
@@ -264,14 +281,16 @@ function createSunCity() {
     }
   }
 
-  updateShadows(0.5, 0.5);
+  // Initial sun: 45° altitude, coming from top-right
+  updateShadows(Math.PI * 0.75, Math.PI / 4);
 
   function animate() {
     animId = requestAnimationFrame(animate);
 
-    var sunDirX = -mouse.x + 0.3;
-    var sunDirZ = mouse.y + 0.3;
-    updateShadows(sunDirX, sunDirZ);
+    // mouse.x -> azimuth (0 to 2π), mouse.y -> altitude (15° to 80°)
+    var azimuth = (mouse.x + 1) * Math.PI;
+    var altitude = ((mouse.y + 1) / 2) * (70 * Math.PI / 180) + (15 * Math.PI / 180);
+    updateShadows(azimuth, altitude);
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;

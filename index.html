@@ -265,6 +265,40 @@
     }
     .btn-submit:hover { opacity: 0.6; }
 
+    /* ── Play ── */
+    .play-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - clamp(48px, 6vw, 72px));
+    }
+    #play-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    .play-switch {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--fg);
+      color: var(--bg);
+      border: none;
+      font-family: inherit;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.12s;
+    }
+    .play-switch:hover { opacity: 0.6; }
+    .play-switch svg { stroke: var(--bg); }
+
     /* ── Large screens (27"+) ── */
     @media (min-width: 1600px) {
       .social-icons { gap: clamp(14px, 1.2vw, 22px); margin-top: clamp(32px, 2.5vw, 48px); }
@@ -321,6 +355,7 @@
       <a href="#" id="nav-bio"        onclick="showPage('bio');        return false;">bio</a>
       <a href="assets/portfolio.pdf" id="nav-portfolio" target="_blank" rel="noopener">portfolio</a>
       <a href="#" id="nav-enactments" onclick="showPage('enactments'); return false;">enactments</a>
+      <a href="#" id="nav-play"       onclick="showPage('play');       return false;">play</a>
       <a href="assets/cv.pdf"      id="nav-cv"         target="_blank" rel="noopener">cv</a>
       <a href="#" id="nav-contact"    onclick="showPage('contact');    return false;" class="contact-link">contact</a>
     </nav>
@@ -403,6 +438,16 @@
 
     </section>
 
+    <section class="page" id="play">
+      <div class="play-container">
+        <canvas id="play-canvas"></canvas>
+        <button class="play-switch" onclick="nextToy()">
+          <span class="play-switch-label"></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </section>
+
     <section class="page" id="contact">
       <div class="contact-form">
         <div class="form-group">
@@ -438,7 +483,7 @@
 </div>
 
 <script>
-  const internalPages = ['bio', 'enactments', 'contact'];
+  const internalPages = ['bio', 'enactments', 'play', 'contact'];
 
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => {
@@ -481,5 +526,6 @@
     });
   }
 </script>
+<script type="module" src="play.js"></script>
 </body>
 </html>

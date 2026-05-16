@@ -404,8 +404,7 @@
     </section>
 
     <section class="page" id="contact">
-      <form class="contact-form" action="https://formspree.io/f/xpqbvnlj" method="POST">
-        <input type="hidden" name="_next" value="https://kempffsele.me">
+      <div class="contact-form">
         <div class="form-group">
           <div class="form-label">name</div>
           <div class="form-row">
@@ -431,8 +430,8 @@
           <label class="form-label">message <span class="req">(required)</span></label>
           <textarea name="message" required></textarea>
         </div>
-        <div class="form-submit-row"><button type="submit" class="btn-submit">Submit</button></div>
-      </form>
+        <div class="form-submit-row"><button type="button" class="btn-submit" onclick="handleSubmit(this)">Submit</button></div>
+      </div>
     </section>
 
   </main>
@@ -451,6 +450,36 @@
     });
   }
 
+  function handleSubmit(btn) {
+    var form = document.querySelector('.contact-form');
+    var inputs = form.querySelectorAll('[required]');
+    for (var i = 0; i < inputs.length; i++) {
+      if (!inputs[i].value.trim()) { inputs[i].focus(); return; }
+    }
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    var data = new FormData();
+    form.querySelectorAll('input[name], textarea[name]').forEach(function(el) {
+      data.append(el.name, el.value);
+    });
+    fetch('https://formspree.io/f/xpqbvnlj', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: data
+    }).then(function(r) {
+      if (r.ok) {
+        btn.textContent = 'Sent';
+        form.querySelectorAll('input:not([type=hidden]), textarea').forEach(function(el) { el.value = ''; });
+        setTimeout(function() { btn.textContent = 'Submit'; btn.disabled = false; }, 3000);
+      } else {
+        btn.textContent = 'Error — try again';
+        btn.disabled = false;
+      }
+    }).catch(function() {
+      btn.textContent = 'Error — try again';
+      btn.disabled = false;
+    });
+  }
 </script>
 </body>
 </html>

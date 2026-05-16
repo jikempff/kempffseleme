@@ -503,7 +503,7 @@ function createLSystem() {
   scene.add(treeGroup);
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
-  var iterations = 0;
+  var iterations = 2;
   var maxIterations = 6;
   var baseAngle = 22 + Math.random() * 10;
 
@@ -719,9 +719,9 @@ function createSwarm() {
 }
 
 // Start when play page is shown
-var origShowPage = window.showPage || function() {};
-window.addEventListener('DOMContentLoaded', function() {
-  origShowPage = window.showPage;
+function hookShowPage() {
+  var origShowPage = window.showPage;
+  if (!origShowPage) return;
   window.showPage = function(id) {
     origShowPage(id);
     if (id === 'play') {
@@ -731,4 +731,9 @@ window.addEventListener('DOMContentLoaded', function() {
       if (animId) { cancelAnimationFrame(animId); animId = null; }
     }
   };
-});
+}
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', hookShowPage);
+} else {
+  hookShowPage();
+}

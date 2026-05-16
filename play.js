@@ -297,8 +297,9 @@ function createSunCity() {
   function animate() {
     animId = requestAnimationFrame(animate);
 
-    var azimuth = (mouse.x + 1) * Math.PI;
-    var altitude = ((mouse.y + 1) / 2) * (60 * Math.PI / 180) + (15 * Math.PI / 180);
+    // mouse.x -> azimuth (0 to π), mouse.y -> altitude (45° to 90°)
+    var azimuth = (mouse.x + 1) / 2 * Math.PI;
+    var altitude = ((mouse.y + 1) / 2) * (45 * Math.PI / 180) + (45 * Math.PI / 180);
     updateShadows(azimuth, altitude);
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;

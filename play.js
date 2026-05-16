@@ -149,7 +149,7 @@ function convexHull(points) {
 }
 function cross(o, a, b) { return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }
 
-// === TOY 2: SUN & CITY (top-down, all on one ground plane, renderOrder layering) ===
+// === TOY 2: SUN & CITY (top-down, ground-plane shadows, height-aware layering) ===
 function createSunCity() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
@@ -166,9 +166,9 @@ function createSunCity() {
   var buildings = [];
 
   // City grid: varied overlapping volumes per block (massing model)
-  var streetW = 8;
-  var gridCount = 10;
-  var blockW = 42, blockD = 42;
+  var streetW = 12;
+  var gridCount = 8;
+  var blockW = 50, blockD = 50;
   var totalW = gridCount * (blockW + streetW);
   var offX = -totalW / 2, offZ = -totalW / 2;
 
@@ -177,20 +177,20 @@ function createSunCity() {
       var bkCX = offX + bi * (blockW + streetW) + blockW / 2;
       var bkCZ = offZ + bj * (blockD + streetW) + blockD / 2;
 
-      // Each block gets 2-5 overlapping volumes of varied size
-      var numVols = 2 + Math.floor(Math.random() * 4);
+      // 1-3 overlapping volumes per block
+      var numVols = 1 + Math.floor(Math.random() * 3);
       for (var v = 0; v < numVols; v++) {
         var sizeType = Math.random();
         var bw, bd;
-        if (sizeType < 0.25) {
-          bw = 5 + Math.random() * 10; bd = 5 + Math.random() * 10;
-        } else if (sizeType < 0.5) {
-          bw = 12 + Math.random() * 18; bd = 6 + Math.random() * 12;
-        } else if (sizeType < 0.75) {
-          bw = 20 + Math.random() * 18; bd = 4 + Math.random() * 7;
+        if (sizeType < 0.3) {
+          bw = 6 + Math.random() * 12; bd = 6 + Math.random() * 12;
+        } else if (sizeType < 0.6) {
+          bw = 14 + Math.random() * 16; bd = 8 + Math.random() * 12;
+        } else if (sizeType < 0.8) {
+          bw = 22 + Math.random() * 16; bd = 5 + Math.random() * 8;
           if (Math.random() > 0.5) { var tmp = bw; bw = bd; bd = tmp; }
         } else {
-          bw = 14 + Math.random() * 22; bd = 14 + Math.random() * 22;
+          bw = 16 + Math.random() * 20; bd = 16 + Math.random() * 20;
         }
 
         var margin = 1;
@@ -200,25 +200,24 @@ function createSunCity() {
 
         var bx = bkCX + (Math.random() - 0.5) * 2 * maxOX;
         var bz = bkCZ + (Math.random() - 0.5) * 2 * maxOZ;
-        var bHeight = 10 + Math.random() * 90;
+        var bHeight = 8 + Math.random() * 50;
 
         buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
       }
     }
   }
 
-  // Sort by height ascending: shortest first, tallest last (renders on top)
+  // Sort by height ascending: shortest first, tallest renders on top
   buildings.sort(function(a, b) { return a.h - b.h; });
 
-  // All geometry on ONE ground plane (y=0). Layering via renderOrder only.
-  // depthTest disabled so renderOrder fully controls draw order.
+  // Layering via renderOrder with depthTest disabled (single ground plane).
   // Per building i (sorted shortest→tallest):
-  //   renderOrder i*3     = shadow  (below its own building, above shorter buildings)
-  //   renderOrder i*3 + 1 = fill    (white, covers own shadow footprint)
-  //   renderOrder i*3 + 2 = outline (black edges on top)
-  // A taller building's shadow (renderOrder j*3 where j>i) draws AFTER
-  // a shorter building's outline (renderOrder i*3+2), so the shadow
-  // appears as black ON the shorter building's white surface.
+  //   renderOrder i*3     = shadow
+  //   renderOrder i*3 + 1 = fill (white, covers own shadow + shorter shadows)
+  //   renderOrder i*3 + 2 = outline
+  // A taller building's shadow renders AFTER shorter buildings' fills,
+  // so it visually falls ON shorter buildings. Each building's fill
+  // covers its own shadow footprint area.
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', depthTest: false });
   var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false });
@@ -229,7 +228,6 @@ function createSunCity() {
   for (var i = 0; i < buildings.length; i++) {
     var bld = buildings[i];
 
-    // Fill (white plane on ground)
     var fillGeo = new THREE.PlaneGeometry(bld.w, bld.d);
     var fill = new THREE.Mesh(fillGeo, fillMat);
     fill.rotation.x = -Math.PI / 2;
@@ -237,7 +235,6 @@ function createSunCity() {
     fill.renderOrder = i * 3 + 1;
     scene.add(fill);
 
-    // Outline (black edges on ground)
     var edgesGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(bld.w, bld.d));
     var outline = new THREE.LineSegments(edgesGeo, lineMat);
     outline.rotation.x = -Math.PI / 2;
@@ -248,11 +245,17 @@ function createSunCity() {
     shadowMeshes.push({ mesh: null, order: i * 3 });
   }
 
+  // Check if building j's footprint overlaps building i's shadow zone
+  function rectOverlap(ax, az, ahw, ahd, bx, bz, bhw, bhd) {
+    return ax - ahw < bx + bhw && ax + ahw > bx - bhw &&
+           az - ahd < bz + bhd && az + ahd > bz - bhd;
+  }
+
   function updateShadows(azimuth, altitude) {
     var dirX = Math.cos(azimuth);
     var dirZ = Math.sin(azimuth);
     var tanAlt = Math.tan(altitude);
-    if (tanAlt < 0.1) tanAlt = 0.1;
+    if (tanAlt < 0.2) tanAlt = 0.2;
 
     for (var i = 0; i < buildings.length; i++) {
       if (shadowMeshes[i].mesh) {
@@ -262,10 +265,11 @@ function createSunCity() {
       }
 
       var bld = buildings[i];
-      var shadowLen = bld.h / tanAlt;
-      if (shadowLen > 80) shadowLen = 80;
-      var sx = dirX * shadowLen;
-      var sz = dirZ * shadowLen;
+      // Ground shadow: full height projection
+      var groundLen = bld.h / tanAlt;
+      if (groundLen > 50) groundLen = 50;
+      var sx = dirX * groundLen;
+      var sz = dirZ * groundLen;
 
       var hw = bld.w / 2, hd = bld.d / 2;
       var corners = [
@@ -292,12 +296,11 @@ function createSunCity() {
     }
   }
 
-  updateShadows(Math.PI * 0.75, Math.PI / 4);
+  updateShadows(Math.PI * 0.75, Math.PI / 3);
 
   function animate() {
     animId = requestAnimationFrame(animate);
 
-    // mouse.x -> azimuth (0 to π), mouse.y -> altitude (45° to 90°)
     var azimuth = (mouse.x + 1) / 2 * Math.PI;
     var altitude = ((mouse.y + 1) / 2) * (45 * Math.PI / 180) + (45 * Math.PI / 180);
     updateShadows(azimuth, altitude);

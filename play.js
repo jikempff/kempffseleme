@@ -52,17 +52,17 @@ function createBrickWall() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var frustum = 120;
+  var frustum = 90;
   var aspect = w / h;
   var cam = new THREE.OrthographicCamera(
-    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
+    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 3000
   );
-  cam.position.set(400, 400, 400);
+  cam.position.set(600, 600, 600);
   cam.lookAt(0, 0, 0);
 
   var bricks = [];
   var bw = 18, bh = 9, bd = 9, gap = 2;
-  var cols = 22, rows = 22;
+  var cols = 50, rows = 50;
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
 
   function createWall() {
@@ -122,6 +122,23 @@ function createBrickWall() {
   createBrickWall.cleanup = function() { scene.clear(); bricks.length = 0; };
 }
 
+function convexHull(points) {
+  points = points.slice().sort(function(a, b) { return a[0] - b[0] || a[1] - b[1]; });
+  var lower = [];
+  for (var i = 0; i < points.length; i++) {
+    while (lower.length >= 2 && cross(lower[lower.length-2], lower[lower.length-1], points[i]) <= 0) lower.pop();
+    lower.push(points[i]);
+  }
+  var upper = [];
+  for (var i = points.length - 1; i >= 0; i--) {
+    while (upper.length >= 2 && cross(upper[upper.length-2], upper[upper.length-1], points[i]) <= 0) upper.pop();
+    upper.push(points[i]);
+  }
+  lower.pop(); upper.pop();
+  return lower.concat(upper);
+}
+function cross(o, a, b) { return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }
+
 // === TOY 2: SUN & CITY (top-down, vector shadows, outlines) ===
 function createSunCity() {
   var scene = new THREE.Scene();
@@ -140,24 +157,20 @@ function createSunCity() {
   var shadows = [];
   var outlines = [];
 
-  var blocks = [
-    { x: -180, z: -180, w: 90, d: 70 },
-    { x: -60, z: -180, w: 100, d: 70 },
-    { x: 70, z: -180, w: 80, d: 70 },
-    { x: 180, z: -180, w: 60, d: 70 },
-    { x: -180, z: -80, w: 90, d: 80 },
-    { x: -60, z: -80, w: 100, d: 80 },
-    { x: 70, z: -80, w: 80, d: 80 },
-    { x: 180, z: -80, w: 60, d: 80 },
-    { x: -180, z: 30, w: 90, d: 75 },
-    { x: -60, z: 30, w: 100, d: 75 },
-    { x: 70, z: 30, w: 80, d: 75 },
-    { x: 180, z: 30, w: 60, d: 75 },
-    { x: -180, z: 140, w: 90, d: 70 },
-    { x: -60, z: 140, w: 100, d: 70 },
-    { x: 70, z: 140, w: 80, d: 70 },
-    { x: 180, z: 140, w: 60, d: 70 },
-  ];
+  var blocks = [];
+  var streetW = 12;
+  var blockSizes = [60, 80, 70, 90, 65, 75, 55, 85];
+  var cx = -250, cz;
+  for (var bi = 0; bi < 8; bi++) {
+    var bw2 = blockSizes[bi % blockSizes.length];
+    cz = -250;
+    for (var bj = 0; bj < 8; bj++) {
+      var bd2 = blockSizes[(bi + bj) % blockSizes.length];
+      blocks.push({ x: cx + bw2/2, z: cz + bd2/2, w: bw2, d: bd2 });
+      cz += bd2 + streetW;
+    }
+    cx += bw2 + streetW;
+  }
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
   var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.15 });
@@ -165,7 +178,7 @@ function createSunCity() {
 
   for (var b = 0; b < blocks.length; b++) {
     var block = blocks[b];
-    var numB = 4 + Math.floor(Math.random() * 4);
+    var numB = 3 + Math.floor(Math.random() * 5);
     for (var i = 0; i < numB; i++) {
       var bw = 10 + Math.random() * (block.w * 0.35);
       var bd = 10 + Math.random() * (block.d * 0.35);
@@ -205,22 +218,26 @@ function createSunCity() {
 
     for (var i = 0; i < buildings.length; i++) {
       var bld = buildings[i];
-      var shadowLen = bld.h * 0.6;
+      var shadowLen = bld.h * 0.5;
       var sx = (sunDirX / len) * shadowLen;
       var sz = (sunDirZ / len) * shadowLen;
 
-      var shape = new THREE.Shape();
       var hw = bld.w / 2, hd = bld.d / 2;
-      shape.moveTo(bld.x - hw, bld.z - hd);
-      shape.lineTo(bld.x + hw, bld.z - hd);
-      shape.lineTo(bld.x + hw, bld.z + hd);
-      shape.lineTo(bld.x - hw, bld.z + hd);
-      shape.lineTo(bld.x - hw, bld.z - hd);
-      shape.lineTo(bld.x - hw + sx, bld.z - hd + sz);
-      shape.lineTo(bld.x + hw + sx, bld.z - hd + sz);
-      shape.lineTo(bld.x + hw + sx, bld.z + hd + sz);
-      shape.lineTo(bld.x - hw + sx, bld.z + hd + sz);
-      shape.lineTo(bld.x - hw + sx, bld.z - hd + sz);
+      var corners = [
+        [bld.x - hw, bld.z - hd],
+        [bld.x + hw, bld.z - hd],
+        [bld.x + hw, bld.z + hd],
+        [bld.x - hw, bld.z + hd]
+      ];
+      var shifted = corners.map(function(c) { return [c[0] + sx, c[1] + sz]; });
+
+      var all = corners.concat(shifted);
+      var hull = convexHull(all);
+
+      var shape = new THREE.Shape();
+      shape.moveTo(hull[0][0], hull[0][1]);
+      for (var hi = 1; hi < hull.length; hi++) shape.lineTo(hull[hi][0], hull[hi][1]);
+      shape.closePath();
 
       var geo = new THREE.ShapeGeometry(shape);
       var mesh = new THREE.Mesh(geo, shadowMat);
@@ -273,8 +290,8 @@ function createWaveGrid() {
   cam.position.set(300, 300, 300);
   cam.lookAt(0, 0, 0);
 
-  var gridN = 40;
-  var spacing = 11;
+  var gridN = 50;
+  var spacing = 10;
   var columns = [];
   var startOff = -(gridN - 1) * spacing / 2;
 
@@ -282,7 +299,7 @@ function createWaveGrid() {
 
   for (var gx = 0; gx < gridN; gx++) {
     for (var gz = 0; gz < gridN; gz++) {
-      var geo = new THREE.BoxGeometry(8, 8, 8);
+      var geo = new THREE.BoxGeometry(7, 7, 7);
       var edges = new THREE.EdgesGeometry(geo);
       var line = new THREE.LineSegments(edges, lineMat);
       line.position.x = startOff + gx * spacing;
@@ -344,8 +361,8 @@ function createRelaxMesh() {
   cam.position.set(250, 250, 250);
   cam.lookAt(0, 0, 0);
 
-  var gridN = 20;
-  var restLength = 10;
+  var gridN = 28;
+  var restLength = 12;
   var nodes = [];
   var springs = [];
   var startOff = -(gridN - 1) * restLength / 2;
@@ -481,7 +498,7 @@ function createLSystem() {
   cam.lookAt(0, 0, 0);
 
   var treeGroup = new THREE.Group();
-  treeGroup.position.y = -frustum + 20;
+  treeGroup.position.y = -frustum * 0.85;
   scene.add(treeGroup);
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
@@ -548,7 +565,7 @@ function createLSystem() {
     }
     iterations++;
     var str = generateString(iterations);
-    var len = 40 / Math.pow(1.6, iterations - 1);
+    var len = 100 / Math.pow(1.8, iterations - 1);
     var rad = baseAngle * Math.PI / 180;
     drawTree(str, rad, len);
   }

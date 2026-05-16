@@ -47,60 +47,64 @@ window.nextToy = function() {
   startToy((currentToy + 1) % toys.length);
 };
 
-// === TOY 1: BRICK WALL (front orthographic, outlines, XY rotation) ===
+// === TOY 1: BRICK WALL (isometric orthographic, neverending) ===
 function createBrickWall() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var frustum = 160;
+  var frustum = 120;
   var aspect = w / h;
   var cam = new THREE.OrthographicCamera(
-    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 1000
+    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
   );
-  cam.position.set(0, 0, 500);
+  cam.position.set(400, 400, 400);
   cam.lookAt(0, 0, 0);
 
   var bricks = [];
-  var bw = 28, bh = 13, gap = 3;
-  var cols = Math.ceil(frustum * aspect * 2 / (bw + gap)) + 2;
-  var rows = Math.ceil(frustum * 2 / (bh + gap)) + 2;
-
+  var bw = 18, bh = 9, bd = 9, gap = 2;
+  var cols = 22, rows = 22;
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
 
-  for (var row = 0; row < rows; row++) {
-    var offset = (row % 2) * (bw + gap) / 2;
-    for (var col = 0; col < cols; col++) {
-      var geo = new THREE.PlaneGeometry(bw, bh);
-      var edges = new THREE.EdgesGeometry(geo);
-      var line = new THREE.LineSegments(edges, lineMat.clone());
-      line.position.x = col * (bw + gap) + offset - (cols * (bw + gap)) / 2;
-      line.position.y = row * (bh + gap) - (rows * (bh + gap)) / 2;
-      line.position.z = 0;
-      line.userData.baseX = line.position.x;
-      line.userData.baseY = line.position.y;
-      line.userData.col = col;
-      line.userData.row = row;
-      line.userData.rotZ = 0;
-      scene.add(line);
-      bricks.push(line);
+  function createWall() {
+    for (var row = 0; row < rows; row++) {
+      var offset = (row % 2) * (bw + gap) / 2;
+      for (var col = 0; col < cols; col++) {
+        var geo = new THREE.BoxGeometry(bw, bh, bd);
+        var edges = new THREE.EdgesGeometry(geo);
+        var line = new THREE.LineSegments(edges, lineMat);
+        line.position.x = col * (bw + gap) + offset - (cols * (bw + gap)) / 2;
+        line.position.y = row * (bh + gap) - (rows * (bh + gap)) / 2;
+        line.position.z = 0;
+        line.userData.baseX = line.position.x;
+        line.userData.baseY = line.position.y;
+        line.userData.col = col;
+        line.userData.row = row;
+        line.userData.rotZ = 0;
+        scene.add(line);
+        bricks.push(line);
+      }
     }
   }
+  createWall();
 
   function animate() {
     animId = requestAnimationFrame(animate);
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;
-    var mx = mouse.x * frustum * a2;
-    var my = mouse.y * frustum;
+
+    var wallW = cols * (bw + gap);
+    var wallH = rows * (bh + gap);
+    var mx = mouse.x * wallW / 2;
+    var my = mouse.y * wallH / 2;
 
     for (var i = 0; i < bricks.length; i++) {
       var b = bricks[i];
       var dx = b.userData.baseX - mx;
       var dy = b.userData.baseY - my;
       var dist = Math.sqrt(dx * dx + dy * dy);
-      var radius = 80;
+      var radius = 60;
       var influence = Math.max(0, 1 - dist / radius);
-      var targetRot = influence * Math.PI * 0.6;
+      var targetRot = influence * Math.PI * 0.5;
       b.userData.rotZ += (targetRot - b.userData.rotZ) * 0.08;
       b.rotation.z = b.userData.rotZ;
     }

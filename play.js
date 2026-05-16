@@ -47,11 +47,13 @@ function startToy(index) {
   currentToy = index;
   var nextLabel = document.querySelector('.play-switch-label-next');
   var prevLabel = document.querySelector('.play-switch-label-prev');
+  var titleEl = document.getElementById('play-title');
   var instrEl = document.getElementById('play-instructions');
   var next = (index + 1) % toys.length;
   var prev = (index - 1 + toys.length) % toys.length;
   if (nextLabel) nextLabel.textContent = toyNames[next];
   if (prevLabel) prevLabel.textContent = toyNames[prev];
+  if (titleEl) titleEl.textContent = toyNames[index];
   if (instrEl) instrEl.textContent = toyInstructions[index];
   if (sliderEl) { sliderEl.remove(); sliderEl = null; }
   toys[index]();
@@ -130,7 +132,7 @@ function createBrickWall() {
       var dx = b.userData.baseX - mx;
       var dy = b.userData.baseY - my;
       var dist = Math.sqrt(dx * dx + dy * dy);
-      var radius = 120;
+      var radius = 60;
       var influence = Math.max(0, 1 - dist / radius);
       var targetRot = influence * Math.PI * 0.5;
       b.userData.rotY += (targetRot - b.userData.rotY) * 0.08;
@@ -467,7 +469,7 @@ function createWaveGrid() {
       var dx = c.userData.gx - mx;
       var dz = c.userData.gz - my;
       var dist = Math.sqrt(dx * dx + dz * dz);
-      var wave = Math.sin(dist * 0.3 - time * 3) * Math.max(0, 1 - dist / 35) * 60;
+      var wave = Math.sin(dist * 0.4 - time * 3) * Math.max(0, 1 - dist / 20) * 50;
       var ambient = Math.sin(c.userData.gx * 0.3 + time) * Math.cos(c.userData.gz * 0.3 + time * 0.7) * 6;
       c.userData.targetY = wave + ambient;
       c.position.y += (c.userData.targetY - c.position.y) * 0.1;

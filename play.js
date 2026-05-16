@@ -149,7 +149,7 @@ function convexHull(points) {
 }
 function cross(o, a, b) { return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }
 
-// === TOY 2: SUN & CITY (top-down, vector shadows, height-sorted layering) ===
+// === TOY 2: SUN & CITY (top-down, all on one ground plane, renderOrder layering) ===
 function createSunCity() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
@@ -160,7 +160,7 @@ function createSunCity() {
   var cam = new THREE.OrthographicCamera(
     -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
   );
-  cam.position.set(0, 800, 0);
+  cam.position.set(0, 500, 0);
   cam.lookAt(0, 0, 0);
 
   var buildings = [];
@@ -207,49 +207,45 @@ function createSunCity() {
     }
   }
 
-  // Sort by height: shortest first, so tallest render on top
+  // Sort by height ascending: shortest first, tallest last (renders on top)
   buildings.sort(function(a, b) { return a.h - b.h; });
 
-  var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
-  var fillMat = new THREE.MeshBasicMaterial({
-    color: '#ffffff',
-    polygonOffset: true,
-    polygonOffsetFactor: 1,
-    polygonOffsetUnits: 1
-  });
-  var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', depthWrite: false });
+  // All geometry on ONE ground plane (y=0). Layering via renderOrder only.
+  // depthTest disabled so renderOrder fully controls draw order.
+  // Per building i (sorted shortest→tallest):
+  //   renderOrder i*3     = shadow  (below its own building, above shorter buildings)
+  //   renderOrder i*3 + 1 = fill    (white, covers own shadow footprint)
+  //   renderOrder i*3 + 2 = outline (black edges on top)
+  // A taller building's shadow (renderOrder j*3 where j>i) draws AFTER
+  // a shorter building's outline (renderOrder i*3+2), so the shadow
+  // appears as black ON the shorter building's white surface.
 
-  // Pre-create building meshes (static, height-layered)
-  // Layer order per building i (sorted by height):
-  //   shadow at y = i*3 + 1
-  //   fill   at y = i*3 + 2
-  //   outline at y = i*3 + 3
-  // Taller building's shadow (higher i) renders ABOVE shorter building's fill
-  var buildingMeshes = [];
+  var lineMat = new THREE.LineBasicMaterial({ color: '#000000', depthTest: false });
+  var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false });
+  var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', depthTest: false });
+
   var shadowMeshes = [];
 
   for (var i = 0; i < buildings.length; i++) {
     var bld = buildings[i];
-    var baseY = i * 3;
 
-    // Fill
+    // Fill (white plane on ground)
     var fillGeo = new THREE.PlaneGeometry(bld.w, bld.d);
     var fill = new THREE.Mesh(fillGeo, fillMat);
     fill.rotation.x = -Math.PI / 2;
-    fill.position.set(bld.x, baseY + 2, bld.z);
+    fill.position.set(bld.x, 0, bld.z);
+    fill.renderOrder = i * 3 + 1;
     scene.add(fill);
 
-    // Outline
+    // Outline (black edges on ground)
     var edgesGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(bld.w, bld.d));
     var outline = new THREE.LineSegments(edgesGeo, lineMat);
     outline.rotation.x = -Math.PI / 2;
-    outline.position.set(bld.x, baseY + 3, bld.z);
+    outline.position.set(bld.x, 0, bld.z);
+    outline.renderOrder = i * 3 + 2;
     scene.add(outline);
 
-    buildingMeshes.push({ fill: fill, outline: outline, baseY: baseY });
-
-    // Shadow placeholder (will be rebuilt each frame)
-    shadowMeshes.push({ mesh: null, baseY: baseY });
+    shadowMeshes.push({ mesh: null, order: i * 3 });
   }
 
   function updateShadows(azimuth, altitude) {
@@ -259,7 +255,6 @@ function createSunCity() {
     if (tanAlt < 0.1) tanAlt = 0.1;
 
     for (var i = 0; i < buildings.length; i++) {
-      // Remove old shadow
       if (shadowMeshes[i].mesh) {
         scene.remove(shadowMeshes[i].mesh);
         shadowMeshes[i].mesh.geometry.dispose();
@@ -290,7 +285,8 @@ function createSunCity() {
       var geo = new THREE.ShapeGeometry(shape);
       var mesh = new THREE.Mesh(geo, shadowMat);
       mesh.rotation.x = -Math.PI / 2;
-      mesh.position.y = shadowMeshes[i].baseY + 1;
+      mesh.position.y = 0;
+      mesh.renderOrder = shadowMeshes[i].order;
       scene.add(mesh);
       shadowMeshes[i].mesh = mesh;
     }
@@ -320,7 +316,6 @@ function createSunCity() {
   createSunCity.cleanup = function() {
     scene.clear();
     buildings.length = 0;
-    buildingMeshes.length = 0;
     shadowMeshes.length = 0;
   };
 }

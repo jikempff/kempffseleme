@@ -52,7 +52,7 @@ function createBrickWall() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#ffffff');
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var frustum = 90;
+  var frustum = 80;
   var aspect = w / h;
   var cam = new THREE.OrthographicCamera(
     -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 3000
@@ -62,7 +62,7 @@ function createBrickWall() {
 
   var bricks = [];
   var bw = 18, bh = 9, bd = 9, gap = 2;
-  var cols = 50, rows = 50;
+  var cols = 60, rows = 60;
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
 
   function createWall() {
@@ -158,18 +158,19 @@ function createSunCity() {
   var outlines = [];
 
   var blocks = [];
-  var streetW = 12;
-  var blockSizes = [60, 80, 70, 90, 65, 75, 55, 85];
-  var cx = -250, cz;
-  for (var bi = 0; bi < 8; bi++) {
-    var bw2 = blockSizes[bi % blockSizes.length];
-    cz = -250;
-    for (var bj = 0; bj < 8; bj++) {
-      var bd2 = blockSizes[(bi + bj) % blockSizes.length];
-      blocks.push({ x: cx + bw2/2, z: cz + bd2/2, w: bw2, d: bd2 });
-      cz += bd2 + streetW;
+  var streetW = 8;
+  var gridCount = 10;
+  var blockW = 42, blockD = 42;
+  var totalW = gridCount * (blockW + streetW);
+  var offX = -totalW / 2, offZ = -totalW / 2;
+  for (var bi = 0; bi < gridCount; bi++) {
+    for (var bj = 0; bj < gridCount; bj++) {
+      blocks.push({
+        x: offX + bi * (blockW + streetW) + blockW / 2,
+        z: offZ + bj * (blockD + streetW) + blockD / 2,
+        w: blockW, d: blockD
+      });
     }
-    cx += bw2 + streetW;
   }
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', linewidth: 1 });
@@ -178,13 +179,13 @@ function createSunCity() {
 
   for (var b = 0; b < blocks.length; b++) {
     var block = blocks[b];
-    var numB = 3 + Math.floor(Math.random() * 5);
+    var numB = 2 + Math.floor(Math.random() * 3);
     for (var i = 0; i < numB; i++) {
-      var bw = 10 + Math.random() * (block.w * 0.35);
-      var bd = 10 + Math.random() * (block.d * 0.35);
-      var bHeight = 30 + Math.random() * 160;
-      var bx = block.x + (Math.random() - 0.5) * (block.w - bw) * 0.8;
-      var bz = block.z + (Math.random() - 0.5) * (block.d - bd) * 0.8;
+      var bw = 8 + Math.random() * (block.w * 0.5);
+      var bd = 8 + Math.random() * (block.d * 0.5);
+      var bHeight = 20 + Math.random() * 180;
+      var bx = block.x + (Math.random() - 0.5) * (block.w - bw) * 0.7;
+      var bz = block.z + (Math.random() - 0.5) * (block.d - bd) * 0.7;
 
       buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
 
@@ -252,8 +253,8 @@ function createSunCity() {
   function animate() {
     animId = requestAnimationFrame(animate);
 
-    var sunDirX = -mouse.x;
-    var sunDirZ = mouse.y;
+    var sunDirX = -mouse.x + 0.3;
+    var sunDirZ = mouse.y + 0.3;
     updateShadows(sunDirX, sunDirZ);
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;

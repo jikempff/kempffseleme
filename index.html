@@ -280,7 +280,6 @@
     .play-switch {
       position: absolute;
       bottom: 20px;
-      right: 20px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -296,8 +295,25 @@
       cursor: pointer;
       transition: opacity 0.12s;
     }
+    .play-switch-next { right: 20px; }
+    .play-switch-prev { left: 20px; }
     .play-switch:hover { opacity: 0.6; }
     .play-switch svg { stroke: var(--bg); }
+    .play-instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: inherit;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg);
+      opacity: 0.45;
+      pointer-events: none;
+      text-align: center;
+      white-space: nowrap;
+    }
 
     /* ── Large screens (27"+) ── */
     @media (min-width: 1600px) {
@@ -441,8 +457,13 @@
     <section class="page" id="play">
       <div class="play-container">
         <canvas id="play-canvas"></canvas>
-        <button class="play-switch" onclick="nextToy()">
-          <span class="play-switch-label"></span>
+        <button class="play-switch play-switch-prev" onclick="prevToy()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span class="play-switch-label-prev"></span>
+        </button>
+        <div class="play-instructions" id="play-instructions"></div>
+        <button class="play-switch play-switch-next" onclick="nextToy()">
+          <span class="play-switch-label-next"></span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
@@ -526,6 +547,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=3"></script>
+<script type="module" src="play.js?v=4"></script>
 </body>
 </html>

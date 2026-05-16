@@ -165,36 +165,72 @@ function createSunCity() {
 
   var buildings = [];
 
-  // City grid: non-overlapping buildings packed within blocks
+  // City grid with varied building sizes, collision-checked placement
   var streetW = 8;
   var gridCount = 10;
   var blockW = 42, blockD = 42;
   var totalW = gridCount * (blockW + streetW);
   var offX = -totalW / 2, offZ = -totalW / 2;
 
+  function rectsOverlap(ax, az, aw, ad, bx, bz, bw, bd) {
+    return !(ax + aw / 2 <= bx - bw / 2 || ax - aw / 2 >= bx + bw / 2 ||
+             az + ad / 2 <= bz - bd / 2 || az - ad / 2 >= bz + bd / 2);
+  }
+
   for (var bi = 0; bi < gridCount; bi++) {
     for (var bj = 0; bj < gridCount; bj++) {
-      var bkX = offX + bi * (blockW + streetW);
-      var bkZ = offZ + bj * (blockD + streetW);
-      // Subdivide each block into a 2x2 grid of lots with small gaps
-      var lotGap = 2;
-      var lotW = (blockW - lotGap) / 2;
-      var lotD = (blockD - lotGap) / 2;
-      for (var li = 0; li < 2; li++) {
-        for (var lj = 0; lj < 2; lj++) {
-          if (Math.random() < 0.15) continue; // some empty lots
-          var lotX = bkX + li * (lotW + lotGap);
-          var lotZ = bkZ + lj * (lotD + lotGap);
-          // Building fills most of the lot with small setback
-          var setback = 1 + Math.random() * 2;
-          var bw = lotW - setback * 2;
-          var bd = lotD - setback * 2;
-          if (bw < 4 || bd < 4) continue;
-          var bHeight = 15 + Math.random() * 80;
-          var bx = lotX + lotW / 2;
-          var bz = lotZ + lotD / 2;
-          buildings.push({ x: bx, z: bz, w: bw, d: bd, h: bHeight });
+      var bkCX = offX + bi * (blockW + streetW) + blockW / 2;
+      var bkCZ = offZ + bj * (blockD + streetW) + blockD / 2;
+      var blockBuildings = [];
+      var numAttempts = 12 + Math.floor(Math.random() * 8);
+
+      for (var attempt = 0; attempt < numAttempts; attempt++) {
+        // Varied building sizes: some small, some large, some long
+        var sizeType = Math.random();
+        var bw, bd;
+        if (sizeType < 0.3) {
+          // Small square
+          bw = 5 + Math.random() * 8;
+          bd = 5 + Math.random() * 8;
+        } else if (sizeType < 0.6) {
+          // Medium rectangle
+          bw = 10 + Math.random() * 15;
+          bd = 6 + Math.random() * 10;
+        } else if (sizeType < 0.8) {
+          // Long bar
+          bw = 18 + Math.random() * 20;
+          bd = 4 + Math.random() * 6;
+          if (Math.random() > 0.5) { var tmp = bw; bw = bd; bd = tmp; }
+        } else {
+          // Large block
+          bw = 15 + Math.random() * 20;
+          bd = 15 + Math.random() * 20;
         }
+
+        var margin = 1.5;
+        var maxOffX = (blockW - bw) / 2 - margin;
+        var maxOffZ = (blockD - bd) / 2 - margin;
+        if (maxOffX < 0 || maxOffZ < 0) continue;
+
+        var bx = bkCX + (Math.random() - 0.5) * 2 * maxOffX;
+        var bz = bkCZ + (Math.random() - 0.5) * 2 * maxOffZ;
+
+        // Collision check against existing buildings in this block
+        var overlaps = false;
+        var gap = 2;
+        for (var e = 0; e < blockBuildings.length; e++) {
+          var ex = blockBuildings[e];
+          if (rectsOverlap(bx, bz, bw + gap, bd + gap, ex.x, ex.z, ex.w, ex.d)) {
+            overlaps = true;
+            break;
+          }
+        }
+        if (overlaps) continue;
+
+        var bHeight = 10 + Math.random() * 90;
+        var bldg = { x: bx, z: bz, w: bw, d: bd, h: bHeight };
+        blockBuildings.push(bldg);
+        buildings.push(bldg);
       }
     }
   }
@@ -242,18 +278,15 @@ function createSunCity() {
       if (child.geometry) child.geometry.dispose();
     }
 
-    // Shadow direction from azimuth, length from altitude
     var dirX = Math.cos(azimuth);
     var dirZ = Math.sin(azimuth);
-    // altitude: high sun = short shadow, low sun = long shadow
     var tanAlt = Math.tan(altitude);
-    if (tanAlt < 0.05) tanAlt = 0.05;
+    if (tanAlt < 0.1) tanAlt = 0.1;
 
     for (var i = 0; i < buildings.length; i++) {
       var bld = buildings[i];
       var shadowLen = bld.h / tanAlt;
-      // Clamp shadow length to something reasonable
-      if (shadowLen > 120) shadowLen = 120;
+      if (shadowLen > 80) shadowLen = 80;
       var sx = dirX * shadowLen;
       var sz = dirZ * shadowLen;
 
@@ -281,15 +314,14 @@ function createSunCity() {
     }
   }
 
-  // Initial sun: 45° altitude, coming from top-right
   updateShadows(Math.PI * 0.75, Math.PI / 4);
 
   function animate() {
     animId = requestAnimationFrame(animate);
 
-    // mouse.x -> azimuth (0 to 2π), mouse.y -> altitude (15° to 80°)
+    // mouse.x -> azimuth (0 to 2π), mouse.y -> altitude (15° to 75°)
     var azimuth = (mouse.x + 1) * Math.PI;
-    var altitude = ((mouse.y + 1) / 2) * (70 * Math.PI / 180) + (15 * Math.PI / 180);
+    var altitude = ((mouse.y + 1) / 2) * (60 * Math.PI / 180) + (15 * Math.PI / 180);
     updateShadows(azimuth, altitude);
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
@@ -316,12 +348,12 @@ function createWaveGrid() {
   scene.background = new THREE.Color('#ffffff');
 
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var frustum = 220;
+  var frustum = 350;
   var aspect = w / h;
   var cam = new THREE.OrthographicCamera(
     -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
   );
-  cam.position.set(300, 300, 300);
+  cam.position.set(500, 500, 500);
   cam.lookAt(0, 0, 0);
 
   var gridN = 50;
@@ -399,12 +431,12 @@ function createRelaxMesh() {
   scene.background = new THREE.Color('#ffffff');
 
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var frustum = 220;
+  var frustum = 350;
   var aspect = w / h;
   var cam = new THREE.OrthographicCamera(
     -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
   );
-  cam.position.set(300, 300, 300);
+  cam.position.set(500, 500, 500);
   cam.lookAt(0, 0, 0);
 
   var gridN = 28;
@@ -458,7 +490,7 @@ function createRelaxMesh() {
   var damping = 0.9;
 
   function simulate() {
-    var gravity = -load * 1.2;
+    var gravity = load * 1.2;
     for (var i = 0; i < nodes.length; i++) {
       if (!nodes[i].pinned) nodes[i].vy += gravity;
     }

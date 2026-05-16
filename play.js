@@ -207,57 +207,51 @@ function createSunCity() {
     }
   }
 
-  // Sort by height ascending: shortest first, tallest renders on top
-  buildings.sort(function(a, b) { return a.h - b.h; });
+  // Three layers, all depthTest off, using renderOrder:
+  //   Layer 0: ALL shadows (ground plane, black)
+  //   Layer 1: ALL building fills (white, cover shadows where buildings sit)
+  //   Layer 2: ALL building outlines (black edges on top)
+  // Buildings sorted by height so taller ones' fills cover shorter ones.
 
-  // Layering via renderOrder with depthTest disabled (single ground plane).
-  // Per building i (sorted shortest→tallest):
-  //   renderOrder i*3     = shadow
-  //   renderOrder i*3 + 1 = fill (white, covers own shadow + shorter shadows)
-  //   renderOrder i*3 + 2 = outline
-  // A taller building's shadow renders AFTER shorter buildings' fills,
-  // so it visually falls ON shorter buildings. Each building's fill
-  // covers its own shadow footprint area.
+  buildings.sort(function(a, b) { return a.h - b.h; });
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000', depthTest: false });
   var fillMat = new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false });
   var shadowMat = new THREE.MeshBasicMaterial({ color: '#000000', depthTest: false });
 
+  var n = buildings.length;
   var shadowMeshes = [];
 
-  for (var i = 0; i < buildings.length; i++) {
+  for (var i = 0; i < n; i++) {
     var bld = buildings[i];
 
+    // Fill: renderOrder n + i (all fills after all shadows, sorted by height)
     var fillGeo = new THREE.PlaneGeometry(bld.w, bld.d);
     var fill = new THREE.Mesh(fillGeo, fillMat);
     fill.rotation.x = -Math.PI / 2;
     fill.position.set(bld.x, 0, bld.z);
-    fill.renderOrder = i * 3 + 1;
+    fill.renderOrder = n + i;
     scene.add(fill);
 
+    // Outline: renderOrder 2*n + i (all outlines after all fills)
     var edgesGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(bld.w, bld.d));
     var outline = new THREE.LineSegments(edgesGeo, lineMat);
     outline.rotation.x = -Math.PI / 2;
     outline.position.set(bld.x, 0, bld.z);
-    outline.renderOrder = i * 3 + 2;
+    outline.renderOrder = 2 * n + i;
     scene.add(outline);
 
-    shadowMeshes.push({ mesh: null, order: i * 3 });
-  }
-
-  // Check if building j's footprint overlaps building i's shadow zone
-  function rectOverlap(ax, az, ahw, ahd, bx, bz, bhw, bhd) {
-    return ax - ahw < bx + bhw && ax + ahw > bx - bhw &&
-           az - ahd < bz + bhd && az + ahd > bz - bhd;
+    // Shadow: renderOrder i (all shadows first, sorted by height)
+    shadowMeshes.push({ mesh: null, order: i });
   }
 
   function updateShadows(azimuth, altitude) {
     var dirX = Math.cos(azimuth);
     var dirZ = Math.sin(azimuth);
     var tanAlt = Math.tan(altitude);
-    if (tanAlt < 0.2) tanAlt = 0.2;
+    if (tanAlt < 0.3) tanAlt = 0.3;
 
-    for (var i = 0; i < buildings.length; i++) {
+    for (var i = 0; i < n; i++) {
       if (shadowMeshes[i].mesh) {
         scene.remove(shadowMeshes[i].mesh);
         shadowMeshes[i].mesh.geometry.dispose();
@@ -265,9 +259,8 @@ function createSunCity() {
       }
 
       var bld = buildings[i];
-      // Ground shadow: full height projection
       var groundLen = bld.h / tanAlt;
-      if (groundLen > 50) groundLen = 50;
+      if (groundLen > 40) groundLen = 40;
       var sx = dirX * groundLen;
       var sz = dirZ * groundLen;
 

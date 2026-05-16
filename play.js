@@ -47,29 +47,36 @@ window.nextToy = function() {
   startToy((currentToy + 1) % toys.length);
 };
 
-// === TOY 1: BRICK WALL ===
+// === TOY 1: BRICK WALL (isometric) ===
 function createBrickWall() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#f5f5f5');
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var cam = new THREE.OrthographicCamera(-w/2, w/2, h/2, -h/2, 1, 1000);
-  cam.position.set(0, 0, 500);
+  var frustum = 280;
+  var aspect = w / h;
+  var cam = new THREE.OrthographicCamera(
+    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
+  );
+  cam.position.set(400, 400, 400);
+  cam.lookAt(0, 0, 0);
 
-  var cols = Math.ceil(w / 52) + 2;
-  var rows = Math.ceil(h / 28) + 2;
   var bricks = [];
-  var bw = 48, bh = 24, gap = 4;
+  var bw = 36, bh = 18, bd = 18, gap = 3;
+  var cols = 14, rows = 16;
 
   for (var row = 0; row < rows; row++) {
     var offset = (row % 2) * (bw + gap) / 2;
     for (var col = 0; col < cols; col++) {
-      var geo = new THREE.BoxGeometry(bw, bh, 12);
+      var geo = new THREE.BoxGeometry(bw, bh, bd);
       var mat = new THREE.MeshStandardMaterial({ color: '#e8e8e8', roughness: 0.8 });
       var mesh = new THREE.Mesh(geo, mat);
-      mesh.position.x = col * (bw + gap) + offset - w / 2;
-      mesh.position.y = row * (bh + gap) - h / 2;
+      mesh.position.x = col * (bw + gap) + offset - (cols * (bw + gap)) / 2;
+      mesh.position.y = row * (bh + gap) - (rows * (bh + gap)) / 2;
+      mesh.position.z = 0;
       mesh.userData.baseX = mesh.position.x;
       mesh.userData.baseY = mesh.position.y;
+      mesh.userData.col = col;
+      mesh.userData.row = row;
       mesh.userData.rotZ = 0;
       scene.add(mesh);
       bricks.push(mesh);
@@ -77,7 +84,7 @@ function createBrickWall() {
   }
 
   var light = new THREE.DirectionalLight('#ffffff', 1.5);
-  light.position.set(200, 300, 400);
+  light.position.set(300, 500, 400);
   scene.add(light);
   scene.add(new THREE.AmbientLight('#ffffff', 0.5));
 
@@ -86,27 +93,29 @@ function createBrickWall() {
 
   function animate() {
     animId = requestAnimationFrame(animate);
-    var mx = (mouse.x * 0.5 + 0.5) * w - w / 2;
-    var my = (mouse.y * 0.5 + 0.5) * h - h / 2;
+    var mx = mouse.x * cols * 0.5;
+    var my = mouse.y * rows * 0.5;
     for (var i = 0; i < bricks.length; i++) {
       var b = bricks[i];
-      var dx = b.userData.baseX - mx;
-      var dy = b.userData.baseY - my;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      var radius = 180;
+      var dc = b.userData.col - (cols / 2 + mx);
+      var dr = b.userData.row - (rows / 2 + my);
+      var dist = Math.sqrt(dc * dc + dr * dr);
+      var radius = 5;
       var influence = Math.max(0, 1 - dist / radius);
       var targetRot = influence * Math.PI * 0.5;
       b.userData.rotZ += (targetRot - b.userData.rotZ) * 0.08;
       b.rotation.z = b.userData.rotZ;
       b.material.color.copy(baseColor).lerp(accentColor, influence * 0.7);
     }
+    var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
+    var a2 = w2 / h2;
+    cam.left = -frustum * a2;
+    cam.right = frustum * a2;
+    cam.top = frustum;
+    cam.bottom = -frustum;
+    cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);
-    cam.left = -canvas.clientWidth / 2;
-    cam.right = canvas.clientWidth / 2;
-    cam.top = canvas.clientHeight / 2;
-    cam.bottom = -canvas.clientHeight / 2;
-    cam.updateProjectionMatrix();
   }
   animate();
 
@@ -116,47 +125,61 @@ function createBrickWall() {
   };
 }
 
-// === TOY 2: SUN & CITY ===
+// === TOY 2: SUN & CITY (top view, realistic layout) ===
 function createSunCity() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#f0f0f0');
 
   var w = canvas.clientWidth, h = canvas.clientHeight;
+  var frustum = 320;
   var aspect = w / h;
-  var cam = new THREE.PerspectiveCamera(45, aspect, 1, 2000);
-  cam.position.set(0, 250, 400);
+  var cam = new THREE.OrthographicCamera(
+    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
+  );
+  cam.position.set(0, 600, 0);
   cam.lookAt(0, 0, 0);
 
   var ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(600, 600),
-    new THREE.MeshStandardMaterial({ color: '#e0e0e0', roughness: 1 })
+    new THREE.PlaneGeometry(800, 800),
+    new THREE.MeshStandardMaterial({ color: '#e8e8e8', roughness: 1 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
 
   var buildings = [];
-  var gridSize = 7;
-  var spacing = 50;
-  var startOff = -(gridSize - 1) * spacing / 2;
+  var streetW = 14;
 
-  for (var gx = 0; gx < gridSize; gx++) {
-    for (var gz = 0; gz < gridSize; gz++) {
-      if (Math.random() < 0.25) continue;
-      var bHeight = 20 + Math.random() * 120;
-      var bWidth = 18 + Math.random() * 22;
-      var bDepth = 18 + Math.random() * 22;
+  var blocks = [
+    { x: -120, z: -120, w: 80, d: 80 },
+    { x: 0, z: -120, w: 100, d: 80 },
+    { x: 120, z: -120, w: 70, d: 80 },
+    { x: -120, z: 0, w: 80, d: 90 },
+    { x: 20, z: 0, w: 120, d: 90 },
+    { x: 160, z: 0, w: 60, d: 90 },
+    { x: -100, z: 120, w: 100, d: 70 },
+    { x: 60, z: 130, w: 90, d: 60 },
+    { x: 170, z: 120, w: 50, d: 70 },
+  ];
+
+  for (var b = 0; b < blocks.length; b++) {
+    var block = blocks[b];
+    var numB = 3 + Math.floor(Math.random() * 5);
+    for (var i = 0; i < numB; i++) {
+      var bHeight = 30 + Math.random() * 140;
+      var bWidth = 12 + Math.random() * (block.w * 0.4);
+      var bDepth = 12 + Math.random() * (block.d * 0.4);
       var geo = new THREE.BoxGeometry(bWidth, bHeight, bDepth);
-      var shade = 0.85 + Math.random() * 0.15;
+      var shade = 0.82 + Math.random() * 0.18;
       var mat = new THREE.MeshStandardMaterial({
         color: new THREE.Color(shade, shade, shade),
         roughness: 0.9
       });
       var mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(
-        startOff + gx * spacing + (Math.random() - 0.5) * 15,
+        block.x + (Math.random() - 0.5) * (block.w - bWidth),
         bHeight / 2,
-        startOff + gz * spacing + (Math.random() - 0.5) * 15
+        block.z + (Math.random() - 0.5) * (block.d - bDepth)
       );
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -165,37 +188,35 @@ function createSunCity() {
     }
   }
 
-  var sun = new THREE.DirectionalLight('#fff5e6', 2.5);
+  var sun = new THREE.DirectionalLight('#ffffff', 2.8);
   sun.castShadow = true;
   sun.shadow.mapSize.width = 2048;
   sun.shadow.mapSize.height = 2048;
-  sun.shadow.camera.left = -400;
-  sun.shadow.camera.right = 400;
-  sun.shadow.camera.top = 400;
-  sun.shadow.camera.bottom = -400;
+  sun.shadow.camera.left = -500;
+  sun.shadow.camera.right = 500;
+  sun.shadow.camera.top = 500;
+  sun.shadow.camera.bottom = -500;
   sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 1000;
+  sun.shadow.camera.far = 1200;
+  sun.shadow.bias = -0.001;
   scene.add(sun);
-  scene.add(new THREE.AmbientLight('#b0c4de', 0.3));
-
-  var sunSphere = new THREE.Mesh(
-    new THREE.SphereGeometry(10, 16, 16),
-    new THREE.MeshBasicMaterial({ color: '#ffcc44' })
-  );
-  scene.add(sunSphere);
+  scene.add(new THREE.AmbientLight('#ffffff', 0.25));
 
   function animate() {
     animId = requestAnimationFrame(animate);
-    var sunX = mouse.x * 350;
-    var sunZ = mouse.y * 350;
-    var sunY = 300;
+    var sunX = mouse.x * 300;
+    var sunZ = mouse.y * 300;
+    var sunY = 500;
     sun.position.set(sunX, sunY, sunZ);
-    sun.target.position.set(0, 0, 0);
+    sun.target.position.set(sunX * 0.3, 0, sunZ * 0.3);
     sun.target.updateMatrixWorld();
-    sunSphere.position.copy(sun.position);
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
-    cam.aspect = w2 / h2;
+    var a2 = w2 / h2;
+    cam.left = -frustum * a2;
+    cam.right = frustum * a2;
+    cam.top = frustum;
+    cam.bottom = -frustum;
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);
@@ -208,14 +229,18 @@ function createSunCity() {
   };
 }
 
-// === TOY 3: WAVE GRID ===
+// === TOY 3: WAVE GRID (isometric) ===
 function createWaveGrid() {
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#fafafa');
 
   var w = canvas.clientWidth, h = canvas.clientHeight;
-  var cam = new THREE.PerspectiveCamera(50, w / h, 1, 2000);
-  cam.position.set(0, 300, 350);
+  var frustum = 260;
+  var aspect = w / h;
+  var cam = new THREE.OrthographicCamera(
+    -frustum * aspect, frustum * aspect, frustum, -frustum, 1, 2000
+  );
+  cam.position.set(300, 300, 300);
   cam.lookAt(0, 0, 0);
 
   var gridN = 30;
@@ -271,7 +296,11 @@ function createWaveGrid() {
     }
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
-    cam.aspect = w2 / h2;
+    var a2 = w2 / h2;
+    cam.left = -frustum * a2;
+    cam.right = frustum * a2;
+    cam.top = frustum;
+    cam.bottom = -frustum;
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);

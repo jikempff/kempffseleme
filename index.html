@@ -172,7 +172,7 @@
       margin-bottom: 1.2em;
     }
 
-    /* ── Enactments ── */
+    /* ── Writings ── */
     .entry {
       display: grid;
       grid-template-columns: clamp(120px, 12vw, 200px) 1fr;
@@ -380,7 +380,7 @@
     <nav>
       <a href="#" id="nav-bio"        onclick="showPage('bio');        return false;">bio</a>
       <a href="assets/portfolio.pdf" id="nav-portfolio" target="_blank" rel="noopener">portfolio</a>
-      <a href="#" id="nav-enactments" onclick="showPage('enactments'); return false;">enactments</a>
+      <a href="#" id="nav-writings" onclick="showPage('writings'); return false;">writings</a>
       <a href="#" id="nav-play"       onclick="showPage('play');       return false;">play</a>
       <a href="assets/cv.pdf"      id="nav-cv"         target="_blank" rel="noopener">cv</a>
       <a href="#" id="nav-contact"    onclick="showPage('contact');    return false;" class="contact-link">contact</a>
@@ -424,7 +424,7 @@
       </div>
     </section>
 
-    <section class="page" id="enactments">
+    <section class="page" id="writings">
 
       <div class="entry">
         <div class="entry-img"><img src="assets/img-simulated-certainty.webp" alt="Simulated Certainty"></div>
@@ -517,7 +517,7 @@
 </div>
 
 <script>
-  const internalPages = ['bio', 'enactments', 'play', 'contact'];
+  const internalPages = ['bio', 'writings', 'play', 'contact'];
 
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => {
@@ -560,6 +560,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=7"></script>
+<script type="module" src="play.js?v=8"></script>
 </body>
 </html>

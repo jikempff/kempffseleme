@@ -268,8 +268,9 @@
     /* ── Play ── */
     .play-container {
       position: relative;
-      width: 100%;
-      height: calc(100vh - clamp(48px, 6vw, 72px));
+      width: calc(100% + var(--content-pad) + clamp(28px, 3vw, 44px));
+      height: 100vh;
+      margin: calc(-1 * clamp(24px, 3vw, 36px)) calc(-1 * var(--content-pad)) calc(-1 * var(--content-pad)) calc(-1 * clamp(28px, 3vw, 44px));
     }
     #play-canvas {
       width: 100%;
@@ -560,6 +561,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=11"></script>
+<script type="module" src="play.js?v=12"></script>
 </body>
 </html>

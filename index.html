@@ -286,35 +286,32 @@
       margin-bottom: clamp(28px, 3vw, 48px);
     }
     .cv-name {
-      font-size: clamp(1.6rem, 2.2vw, 2.8rem);
+      font-size: var(--nav-size);
       font-weight: 500;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
+      line-height: 1.22;
       margin-bottom: 8px;
     }
     .cv-contact {
-      font-size: clamp(0.75rem, 0.85vw, 0.95rem);
-      color: var(--muted);
-      line-height: 1.8;
+      font-size: inherit;
+      line-height: 1.6;
     }
-    .cv-contact a { color: var(--muted); text-decoration: none; }
-    .cv-contact a:hover { color: var(--fg); }
+    .cv-contact a { color: var(--fg); text-decoration: none; }
+    .cv-contact a:hover { color: var(--muted); }
     .cv-summary {
-      font-size: clamp(0.88rem, 1vw, 1.1rem);
-      line-height: 1.75;
+      font-size: inherit;
+      line-height: 1.6;
       margin-bottom: clamp(32px, 4vw, 56px);
-      max-width: 680px;
     }
     .cv-section {
       margin-bottom: clamp(28px, 3vw, 48px);
     }
     .cv-section-title {
-      font-size: clamp(0.65rem, 0.75vw, 0.88rem);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      font-size: var(--nav-size);
       font-weight: 500;
+      letter-spacing: 0.04em;
+      line-height: 1.22;
       margin-bottom: clamp(16px, 1.5vw, 24px);
-      padding-bottom: 8px;
-      border-bottom: 1px solid #efefef;
     }
     .cv-entry {
       margin-bottom: clamp(20px, 2vw, 32px);
@@ -325,15 +322,13 @@
       align-items: baseline;
       flex-wrap: wrap;
       gap: 4px 16px;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .cv-entry-org {
-      font-size: clamp(0.92rem, 1.05vw, 1.2rem);
       font-weight: 500;
     }
     .cv-entry-loc {
-      font-size: clamp(0.75rem, 0.85vw, 0.95rem);
-      color: var(--muted);
+      font-weight: 400;
     }
     .cv-entry-role {
       display: flex;
@@ -344,18 +339,13 @@
       margin-bottom: 6px;
     }
     .cv-entry-title {
-      font-size: clamp(0.85rem, 0.95vw, 1.08rem);
       font-weight: 400;
     }
     .cv-entry-date {
-      font-size: clamp(0.7rem, 0.8vw, 0.9rem);
-      color: var(--muted);
       white-space: nowrap;
     }
     .cv-entry-desc {
-      font-size: clamp(0.8rem, 0.88vw, 1rem);
-      line-height: 1.7;
-      color: #444;
+      line-height: 1.6;
     }
     .cv-entry-desc ul {
       list-style: none;
@@ -369,16 +359,15 @@
     .cv-entry-desc li::before {
       content: '\2013';
       margin-right: 0.4em;
-      color: var(--muted);
     }
+    .cv-italic { font-style: italic; }
     .cv-two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: clamp(16px, 2vw, 32px);
     }
     .cv-list {
-      font-size: clamp(0.8rem, 0.88vw, 1rem);
-      line-height: 1.8;
+      line-height: 1.6;
       list-style: none;
       padding: 0;
     }
@@ -387,15 +376,12 @@
       font-weight: 500;
       margin-top: 12px;
       margin-bottom: 2px;
-      font-size: clamp(0.78rem, 0.86vw, 0.98rem);
     }
     .cv-refs {
-      font-size: clamp(0.75rem, 0.85vw, 0.95rem);
-      line-height: 1.8;
-      color: #444;
+      line-height: 1.6;
     }
-    .cv-refs a { color: var(--muted); text-decoration: none; }
-    .cv-refs a:hover { color: var(--fg); }
+    .cv-refs a { color: var(--fg); text-decoration: none; }
+    .cv-refs a:hover { color: var(--muted); }
     .cv-download {
       display: inline-block;
       margin-top: clamp(8px, 1vw, 16px);
@@ -721,7 +707,7 @@
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Aparicio Arquitectura</span>
+              <span class="cv-entry-org cv-italic">Aparicio Arquitectura</span>
               <span class="cv-entry-loc">Santa Cruz de la Sierra, Bolivia</span>
             </div>
             <div class="cv-entry-role">
@@ -732,7 +718,7 @@
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Sommet &amp; Asociados</span>
+              <span class="cv-entry-org cv-italic">Sommet &amp; Asociados</span>
               <span class="cv-entry-loc">Santa Cruz de la Sierra, Bolivia</span>
             </div>
             <div class="cv-entry-role">
@@ -759,7 +745,7 @@
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Universitat Polit&egrave;cnica de Catalunya</span>
+              <span class="cv-entry-org cv-italic">Universitat Polit&egrave;cnica de Catalunya</span>
               <span class="cv-entry-loc">Barcelona, Spain</span>
             </div>
             <div class="cv-entry-role">
@@ -770,7 +756,7 @@
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Universidad Polit&eacute;cnica de Madrid &ndash; ETSAM</span>
+              <span class="cv-entry-org cv-italic">Universidad Polit&eacute;cnica de Madrid &ndash; ETSAM</span>
               <span class="cv-entry-loc">Madrid, Spain</span>
             </div>
             <div class="cv-entry-role">
@@ -778,13 +764,13 @@
               <span class="cv-entry-date">2022 &ndash; 2023</span>
             </div>
             <div class="cv-entry-desc"><ul>
-              <li>Thesis: &ldquo;S&Uacute;PER M.A.N. &ndash; Un nuevo paradigma de museo arqueol&oacute;gico&rdquo;</li>
+              <li>Thesis: <span class="cv-italic">&ldquo;S&Uacute;PER M.A.N. &ndash; Un nuevo paradigma de museo arqueol&oacute;gico&rdquo;</span></li>
             </ul></div>
           </div>
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Universidad Polit&eacute;cnica de Madrid &ndash; ETSAM</span>
+              <span class="cv-entry-org cv-italic">Universidad Polit&eacute;cnica de Madrid &ndash; ETSAM</span>
               <span class="cv-entry-loc">Madrid, Spain</span>
             </div>
             <div class="cv-entry-role">
@@ -792,13 +778,13 @@
               <span class="cv-entry-date">2015 &ndash; 2022</span>
             </div>
             <div class="cv-entry-desc"><ul>
-              <li>Thesis: &ldquo;La arquitectura y su contexto gr&aacute;fico: Procesos de digitalizaci&oacute;n&rdquo;</li>
+              <li>Thesis: <span class="cv-italic">&ldquo;La arquitectura y su contexto gr&aacute;fico: Procesos de digitalizaci&oacute;n&rdquo;</span></li>
             </ul></div>
           </div>
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Technische Universit&auml;t M&uuml;nchen</span>
+              <span class="cv-entry-org cv-italic">Technische Universit&auml;t M&uuml;nchen</span>
               <span class="cv-entry-loc">Munich, Germany</span>
             </div>
             <div class="cv-entry-role">
@@ -809,7 +795,7 @@
 
           <div class="cv-entry">
             <div class="cv-entry-header">
-              <span class="cv-entry-org">Deutsche Schule Santa Cruz</span>
+              <span class="cv-entry-org cv-italic">Deutsche Schule Santa Cruz</span>
               <span class="cv-entry-loc">Santa Cruz de la Sierra</span>
             </div>
             <div class="cv-entry-role">
@@ -878,8 +864,8 @@
         <div class="cv-section">
           <div class="cv-section-title">Recognitions</div>
           <div class="cv-entry-desc"><ul>
-            <li>&ldquo;With Honours&rdquo; course on Soil Mechanics at ETSAM and highest achievements in three courses at TUM</li>
-            <li>Exhibition of Final Bachelor Project in Matadero (Madrid), as part of the ETSAM Show, 2022</li>
+            <li>&ldquo;With Honours&rdquo; course on Soil Mechanics at <span class="cv-italic">ETSAM</span> and highest achievements in three courses at <span class="cv-italic">TUM</span></li>
+            <li>Exhibition of Final Bachelor Project in Matadero (Madrid), as part of the <span class="cv-italic">ETSAM</span> Show, 2022</li>
             <li>Second best student (salutatorian) of the class of 2014 in the German School</li>
             <li>Rotary Club Prize for best student in High School, 2014</li>
           </ul></div>
@@ -891,9 +877,9 @@
           <div class="cv-entry-desc"><ul>
             <li>Lead Representative of the Bartlett School of Architecture, UCL (2025&ndash;2026)</li>
             <li>Student Representative of the MSc Architectural Computation at UCL (2025&ndash;2026)</li>
-            <li>Multiple times elected as class delegate at ETSAM (2016&ndash;2022)</li>
-            <li>Erasmus Buddy for incoming international students at ETSAM (2022)</li>
-            <li>Student representative of the ETSAM's Council (2018)</li>
+            <li>Multiple times elected as class delegate at <span class="cv-italic">ETSAM</span> (2016&ndash;2022)</li>
+            <li>Erasmus Buddy for incoming international students at <span class="cv-italic">ETSAM</span> (2022)</li>
+            <li>Student representative of the <span class="cv-italic">ETSAM</span>'s Council (2018)</li>
             <li>Model-UN delegate, awarded with the excellence prize award (2012&ndash;2014)</li>
             <li>Volunteer work (200h) for various NGOs in Bolivia (2012&ndash;2013)</li>
           </ul></div>
@@ -1046,6 +1032,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=20"></script>
+<script type="module" src="play.js?v=21"></script>
 </body>
 </html>

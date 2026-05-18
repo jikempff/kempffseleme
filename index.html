@@ -266,11 +266,13 @@
     .btn-submit:hover { opacity: 0.6; }
 
     /* ── Play ── */
+    .content.play-active {
+      padding: 0;
+    }
     .play-container {
       position: relative;
-      width: calc(100% + var(--content-pad) + clamp(28px, 3vw, 44px));
+      width: 100%;
       height: 100vh;
-      margin: calc(-1 * clamp(24px, 3vw, 36px)) calc(-1 * var(--content-pad)) calc(-1 * var(--content-pad)) calc(-1 * clamp(28px, 3vw, 44px));
     }
     #play-canvas {
       width: 100%;
@@ -528,6 +530,7 @@
       const el = document.getElementById('nav-' + p);
       if (el) el.classList.toggle('active', p === id);
     });
+    document.querySelector('.content').classList.toggle('play-active', id === 'play');
   }
 
   function handleSubmit(btn) {
@@ -561,6 +564,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=12"></script>
+<script type="module" src="play.js?v=13"></script>
 </body>
 </html>

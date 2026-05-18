@@ -278,6 +278,142 @@
     }
     .btn-submit:hover { opacity: 0.6; }
 
+    /* ── CV ── */
+    .cv-page {
+      max-width: 860px;
+    }
+    .cv-header {
+      margin-bottom: clamp(28px, 3vw, 48px);
+    }
+    .cv-name {
+      font-size: clamp(1.6rem, 2.2vw, 2.8rem);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+    .cv-contact {
+      font-size: clamp(0.75rem, 0.85vw, 0.95rem);
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .cv-contact a { color: var(--muted); text-decoration: none; }
+    .cv-contact a:hover { color: var(--fg); }
+    .cv-summary {
+      font-size: clamp(0.88rem, 1vw, 1.1rem);
+      line-height: 1.75;
+      margin-bottom: clamp(32px, 4vw, 56px);
+      max-width: 680px;
+    }
+    .cv-section {
+      margin-bottom: clamp(28px, 3vw, 48px);
+    }
+    .cv-section-title {
+      font-size: clamp(0.65rem, 0.75vw, 0.88rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: clamp(16px, 1.5vw, 24px);
+      padding-bottom: 8px;
+      border-bottom: 1px solid #efefef;
+    }
+    .cv-entry {
+      margin-bottom: clamp(20px, 2vw, 32px);
+    }
+    .cv-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      margin-bottom: 4px;
+    }
+    .cv-entry-org {
+      font-size: clamp(0.92rem, 1.05vw, 1.2rem);
+      font-weight: 500;
+    }
+    .cv-entry-loc {
+      font-size: clamp(0.75rem, 0.85vw, 0.95rem);
+      color: var(--muted);
+    }
+    .cv-entry-role {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 2px 16px;
+      margin-bottom: 6px;
+    }
+    .cv-entry-title {
+      font-size: clamp(0.85rem, 0.95vw, 1.08rem);
+      font-weight: 400;
+    }
+    .cv-entry-date {
+      font-size: clamp(0.7rem, 0.8vw, 0.9rem);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .cv-entry-desc {
+      font-size: clamp(0.8rem, 0.88vw, 1rem);
+      line-height: 1.7;
+      color: #444;
+    }
+    .cv-entry-desc ul {
+      list-style: none;
+      padding: 0;
+    }
+    .cv-entry-desc li {
+      padding-left: 1em;
+      text-indent: -0.6em;
+      margin-bottom: 4px;
+    }
+    .cv-entry-desc li::before {
+      content: '\2013';
+      margin-right: 0.4em;
+      color: var(--muted);
+    }
+    .cv-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(16px, 2vw, 32px);
+    }
+    .cv-list {
+      font-size: clamp(0.8rem, 0.88vw, 1rem);
+      line-height: 1.8;
+      list-style: none;
+      padding: 0;
+    }
+    .cv-list li { margin-bottom: 2px; }
+    .cv-list-label {
+      font-weight: 500;
+      margin-top: 12px;
+      margin-bottom: 2px;
+      font-size: clamp(0.78rem, 0.86vw, 0.98rem);
+    }
+    .cv-refs {
+      font-size: clamp(0.75rem, 0.85vw, 0.95rem);
+      line-height: 1.8;
+      color: #444;
+    }
+    .cv-refs a { color: var(--muted); text-decoration: none; }
+    .cv-refs a:hover { color: var(--fg); }
+    .cv-download {
+      display: inline-block;
+      margin-top: clamp(8px, 1vw, 16px);
+      padding: clamp(10px, 0.8vw, 14px) clamp(20px, 1.6vw, 28px);
+      background: var(--fg);
+      color: var(--bg);
+      font-size: clamp(0.6rem, 0.7vw, 0.82rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.12s;
+    }
+    .cv-download:hover { opacity: 0.6; }
+    @media (max-width: 540px) {
+      .cv-two-col { grid-template-columns: 1fr; }
+    }
+
     /* ── Play ── */
     .content.play-active {
       padding: 0;
@@ -402,7 +538,7 @@
       <a href="assets/portfolio.pdf" id="nav-portfolio" target="_blank" rel="noopener">portfolio</a>
       <a href="#" id="nav-writings" onclick="showPage('writings'); return false;">writings</a>
       <a href="#" id="nav-play"       onclick="showPage('play');       return false;">play</a>
-      <a href="assets/cv.pdf"      id="nav-cv"         target="_blank" rel="noopener">cv</a>
+      <a href="#" id="nav-cv" onclick="showPage('cv'); return false;">cv</a>
       <a href="#" id="nav-contact"    onclick="showPage('contact');    return false;" class="contact-link">contact</a>
     </nav>
 
@@ -484,6 +620,302 @@
 
     </section>
 
+    <section class="page" id="cv">
+      <div class="cv-page">
+
+        <div class="cv-header">
+          <div class="cv-name">Jos&eacute; I. Kempff Seleme</div>
+          <div class="cv-contact">
+            <a href="mailto:joseignacio@kempffsele.me">joseignacio@kempffsele.me</a><br>
+            UK: (+44) 7446524068 &nbsp;&middot;&nbsp; ES: (+34) 610 94 25 14<br>
+            Nationalities: Bolivia / Germany &nbsp;&middot;&nbsp; Spanish driver's license: B
+          </div>
+        </div>
+
+        <p class="cv-summary">Licensed architect (Spain, EU) with a strong focus on computational design, building technology, and graphic communication. Trained in advanced computational workflows for the built environment across multiple scales, from parametric modelling to programming, including machine learning and LLM-based solutions. Strong interest in construction innovation, from BIM to Design for Manufacturing and Assembly (DfMA). Comfortable in fast-paced work environments, with a high level of self-motivation, curiosity, and initiative. Committed to education and knowledge sharing.</p>
+
+        <!-- Experience -->
+        <div class="cv-section">
+          <div class="cv-section-title">Experience</div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Miautics</span>
+              <span class="cv-entry-loc">Madrid, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Computational Design Specialist &ndash; freelance</span>
+              <span class="cv-entry-date">Dec 2023 &ndash; Present</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Mentored +25 M.Arch students and professionals in their design projects</li>
+              <li>Worked in different design stages, from concept to detailing, applying workflows to meet clients' objectives with effective communication and advanced modeling assignments</li>
+              <li>Contributed to the educational platform for the generation, production and representation of architectural projects while investigating how the computational approach should be introduced to students through instrumental methodologies</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Sener / Quark</span>
+              <span class="cv-entry-loc">Madrid, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Structural BIM Architect &ndash; full-time</span>
+              <span class="cv-entry-date">Feb 2025 &ndash; Sep 2025</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Developed national and international data centre projects within multidisciplinary teams, working across RIBA stages 2, 3, and 4 using BIM-based workflows</li>
+              <li>Coordinated and managed structural BIM models through the Autodesk Construction Cloud (ACC)</li>
+              <li>Consolidated and optimised established internal BIM workflows, while proposing and developing new workflow initiatives</li>
+              <li>Supported structural and mechanical calculations, translating analytical outputs into coordinated BIM models applying Spanish and European structural regulations (CTE)</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Ingeser</span>
+              <span class="cv-entry-loc">Madrid, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">BIM Architect &ndash; full-time</span>
+              <span class="cv-entry-date">Feb 2024 &ndash; Oct 2024</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Coordinated and developed national and international buildings for offices, industrial plants and logistics within the BIM scheme using Revit and the Autodesk suite</li>
+              <li>Reviewed third party BIM and IFC models for quality control and coordination</li>
+              <li>Collaborated alongside the Engineering Department from schematic to detail design, plus construction documents and building permits</li>
+              <li>Applied expertise of Spanish and European accessibility, fire safety, structural security and urban regulations</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Ensamble Studio</span>
+              <span class="cv-entry-loc">Madrid, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Architectural Intern</span>
+              <span class="cv-entry-date">Oct 2023 &ndash; Dec 2023</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Trained in on-site construction with the construction of the studio's extension building</li>
+              <li>Managed the building team applying lean principles, minimizing time and effort by 32%</li>
+              <li>Assisted in different projects while being introduced to BIM collaboration</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Redecon</span>
+              <span class="cv-entry-loc">Stuttgart, Germany</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Architectural Designer &ndash; freelance</span>
+              <span class="cv-entry-date">Jan 2021 &ndash; May 2021</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Developed the detail design and construction documentation for a new rehabilitation building</li>
+              <li>Met strict deadlines according to the building and administrative schedule during execution phase</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Aparicio Arquitectura</span>
+              <span class="cv-entry-loc">Santa Cruz de la Sierra, Bolivia</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Architectural Intern</span>
+              <span class="cv-entry-date">Sep 2020 &ndash; Feb 2021</span>
+            </div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Sommet &amp; Asociados</span>
+              <span class="cv-entry-loc">Santa Cruz de la Sierra, Bolivia</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Design Assistant &ndash; internship</span>
+              <span class="cv-entry-date">Summer 2018</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Education -->
+        <div class="cv-section">
+          <div class="cv-section-title">Education</div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">University College London &ndash; The Bartlett School of Architecture</span>
+              <span class="cv-entry-loc">London, UK</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">MSc in Architectural Computation</span>
+              <span class="cv-entry-date">2025 &ndash; 2026</span>
+            </div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Universitat Polit&egrave;cnica de Catalunya</span>
+              <span class="cv-entry-loc">Barcelona, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Postgraduate in BIM for Modeling, Calculation and Simulation</span>
+              <span class="cv-entry-date">2024</span>
+            </div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Universidad Polit&eacute;cnica de Madrid &ndash; ETSAM</span>
+              <span class="cv-entry-loc">Madrid, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Master of Architecture</span>
+              <span class="cv-entry-date">2022 &ndash; 2023</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Thesis: &ldquo;S&Uacute;PER M.A.N. &ndash; Un nuevo paradigma de museo arqueol&oacute;gico&rdquo;</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Universidad Polit&eacute;cnica de Madrid &ndash; ETSAM</span>
+              <span class="cv-entry-loc">Madrid, Spain</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">BSc in Foundations of Architecture</span>
+              <span class="cv-entry-date">2015 &ndash; 2022</span>
+            </div>
+            <div class="cv-entry-desc"><ul>
+              <li>Thesis: &ldquo;La arquitectura y su contexto gr&aacute;fico: Procesos de digitalizaci&oacute;n&rdquo;</li>
+            </ul></div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Technische Universit&auml;t M&uuml;nchen</span>
+              <span class="cv-entry-loc">Munich, Germany</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">Erasmus+ Exchange Programme</span>
+              <span class="cv-entry-date">2020 &ndash; 2021</span>
+            </div>
+          </div>
+
+          <div class="cv-entry">
+            <div class="cv-entry-header">
+              <span class="cv-entry-org">Deutsche Schule Santa Cruz</span>
+              <span class="cv-entry-loc">Santa Cruz de la Sierra</span>
+            </div>
+            <div class="cv-entry-role">
+              <span class="cv-entry-title">International Baccalaureate Diploma / High School Diploma</span>
+              <span class="cv-entry-date">2002 &ndash; 2014</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Languages -->
+        <div class="cv-section">
+          <div class="cv-section-title">Languages</div>
+          <ul class="cv-list">
+            <li>Spanish (Native)</li>
+            <li>English (C1)</li>
+            <li>German (B2)</li>
+          </ul>
+        </div>
+
+        <!-- Tools & Programming -->
+        <div class="cv-section">
+          <div class="cv-section-title">Tools &amp; Programming</div>
+          <div class="cv-two-col">
+            <div>
+              <div class="cv-list-label">Computational Design</div>
+              <ul class="cv-list">
+                <li>Rhinoceros, Grasshopper</li>
+                <li>Visual Studio Code, GitHub</li>
+              </ul>
+              <div class="cv-list-label">BIM &amp; Digital Construction</div>
+              <ul class="cv-list">
+                <li>Revit, Dynamo, AutoCAD</li>
+                <li>Autodesk Construction Cloud</li>
+              </ul>
+              <div class="cv-list-label">Structural &amp; Environmental Analysis</div>
+              <ul class="cv-list">
+                <li>Karamba, IDEA StatiCa, Robot Structural Analysis</li>
+                <li>Ladybug, Kangaroo</li>
+                <li>CYPE, CYPECAD</li>
+              </ul>
+            </div>
+            <div>
+              <div class="cv-list-label">AI &amp; Automation</div>
+              <ul class="cv-list">
+                <li>LLMs (Gemini, ChatGPT, Claude)</li>
+                <li>ComfyUI</li>
+              </ul>
+              <div class="cv-list-label">Visualization &amp; Media</div>
+              <ul class="cv-list">
+                <li>Blender, Twinmotion, D5 Render, Enscape, Lumion</li>
+                <li>Adobe Creative Cloud (Ps, Ai, Id, Ae, Pr)</li>
+              </ul>
+              <div class="cv-list-label">GIS &amp; Data</div>
+              <ul class="cv-list">
+                <li>QGIS, ArcGIS</li>
+              </ul>
+              <div class="cv-list-label">Programming</div>
+              <ul class="cv-list">
+                <li>C#, Python, RhinoScriptSyntax</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recognitions -->
+        <div class="cv-section">
+          <div class="cv-section-title">Recognitions</div>
+          <div class="cv-entry-desc"><ul>
+            <li>&ldquo;With Honours&rdquo; course on Soil Mechanics at ETSAM and highest achievements in three courses at TUM</li>
+            <li>Exhibition of Final Bachelor Project in Matadero (Madrid), as part of the ETSAM Show, 2022</li>
+            <li>Second best student (salutatorian) of the class of 2014 in the German School</li>
+            <li>Rotary Club Prize for best student in High School, 2014</li>
+          </ul></div>
+        </div>
+
+        <!-- Extracurriculars -->
+        <div class="cv-section">
+          <div class="cv-section-title">Extracurriculars</div>
+          <div class="cv-entry-desc"><ul>
+            <li>Lead Representative of the Bartlett School of Architecture, UCL (2025&ndash;2026)</li>
+            <li>Student Representative of the MSc Architectural Computation at UCL (2025&ndash;2026)</li>
+            <li>Multiple times elected as class delegate at ETSAM (2016&ndash;2022)</li>
+            <li>Erasmus Buddy for incoming international students at ETSAM (2022)</li>
+            <li>Student representative of the ETSAM's Council (2018)</li>
+            <li>Model-UN delegate, awarded with the excellence prize award (2012&ndash;2014)</li>
+            <li>Volunteer work (200h) for various NGOs in Bolivia (2012&ndash;2013)</li>
+          </ul></div>
+        </div>
+
+        <!-- References -->
+        <div class="cv-section">
+          <div class="cv-section-title">References</div>
+          <div class="cv-refs">
+            Martha Tsigkari &middot; <a href="mailto:m.tsigkari@ucl.ac.uk">m.tsigkari@ucl.ac.uk</a><br>
+            Javier Francisco Raposo Grau &middot; <a href="mailto:javierfrancisco.raposo@upm.es">javierfrancisco.raposo@upm.es</a><br>
+            V&iacute;ctor Navarro R&iacute;os &middot; <a href="mailto:victor@langarita-navarro.com">victor@langarita-navarro.com</a><br>
+            Sergio del Castello Tello &middot; <a href="mailto:miautics@miautics.com">miautics@miautics.com</a><br>
+            Ant&oacute;n Garc&iacute;a-Abril &middot; <a href="mailto:anton@ensamble.com">anton@ensamble.com</a>
+          </div>
+        </div>
+
+        <a href="assets/cv.pdf" class="cv-download" target="_blank" rel="noopener">Download PDF</a>
+
+      </div>
+    </section>
+
     <section class="page" id="play">
       <div class="play-container">
         <canvas id="play-canvas"></canvas>
@@ -537,7 +969,7 @@
 </div>
 
 <script>
-  const internalPages = ['bio', 'writings', 'play', 'contact'];
+  const internalPages = ['bio', 'writings', 'play', 'cv', 'contact'];
 
   function showPage(id, pushState) {
     document.querySelectorAll('.page').forEach(p => {
@@ -614,6 +1046,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=19"></script>
+<script type="module" src="play.js?v=20"></script>
 </body>
 </html>

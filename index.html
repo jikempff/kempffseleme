@@ -141,11 +141,11 @@
       transition: color 0.12s;
       white-space: nowrap;
     }
-    nav a.active {
+    nav a.active,
+    nav a:hover {
       color: var(--bg);
       -webkit-text-stroke: 1px var(--fg);
     }
-    nav a:hover { color: var(--muted); }
     .shell.play-mode nav a:not(.active) {
       text-shadow:
         -2px -2px 0 #fff, 2px -2px 0 #fff,
@@ -536,12 +536,29 @@
       .bio-photo { height: auto; aspect-ratio: 3/4; }
     }
 
-    /* ── Hamburger (hidden on desktop) ── */
+    /* ── Mobile logo + hamburger (hidden on desktop) ── */
+    .mobile-logo {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 18px;
+      z-index: 100;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      line-height: 0;
+    }
+    .mobile-logo svg {
+      width: 36px;
+      height: 36px;
+      fill: var(--fg);
+    }
     .hamburger {
       display: none;
       position: fixed;
-      top: 18px;
-      left: 18px;
+      top: 22px;
+      left: 62px;
       z-index: 100;
       background: none;
       border: none;
@@ -549,10 +566,11 @@
       padding: 4px;
       line-height: 0;
     }
-    .hamburger svg { width: 28px; height: 28px; stroke: var(--fg); }
+    .hamburger svg { width: 24px; height: 24px; }
 
     /* ── Mobile ── */
     @media (max-width: 540px) {
+      .mobile-logo { display: block; }
       .hamburger { display: block; }
       .sidebar {
         position: fixed;
@@ -592,7 +610,13 @@
 <body>
 <div class="shell">
 
-  <!-- Hamburger (mobile only) -->
+  <!-- Mobile logo + hamburger -->
+  <button class="mobile-logo" onclick="showPage('home')" aria-label="Home">
+    <svg viewBox="0 0 566.9 566.9" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <polygon points="311.8,332.4 311.8,460.5 255.1,460.5 255.1,106.1 311.8,106.1 311.8,234.2 422.7,170.2 451.1,219.3 340.2,283.3 451.1,347.3 422.7,396.4"/>
+      <rect x="141.7" y="254.9" width="56.7" height="56.7"/>
+    </svg>
+  </button>
   <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
     <svg viewBox="0 0 24 24" fill="var(--fg)">
       <rect x="3" y="5" width="18" height="2"/>

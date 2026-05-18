@@ -71,6 +71,16 @@
       align-items: flex-start;
       flex-shrink: 0;
       background: var(--bg);
+      position: relative;
+      z-index: 1;
+      transition: background 0.2s;
+    }
+    .shell.play-mode .sidebar {
+      background: transparent;
+      pointer-events: none;
+    }
+    .shell.play-mode .sidebar * {
+      pointer-events: auto;
     }
 
     /* Logo */
@@ -271,9 +281,12 @@
       overflow: hidden;
     }
     .play-container {
-      position: relative;
-      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
       height: 100vh;
+      z-index: 0;
     }
     #play-canvas {
       width: 100%;
@@ -532,6 +545,7 @@
       if (el) el.classList.toggle('active', p === id);
     });
     document.querySelector('.content').classList.toggle('play-active', id === 'play');
+    document.querySelector('.shell').classList.toggle('play-mode', id === 'play');
   }
 
   function handleSubmit(btn) {
@@ -565,6 +579,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=16"></script>
+<script type="module" src="play.js?v=17"></script>
 </body>
 </html>

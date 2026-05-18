@@ -71,8 +71,6 @@
       align-items: flex-start;
       flex-shrink: 0;
       background: var(--bg);
-      position: relative;
-      z-index: 1;
     }
 
     /* Logo */
@@ -271,10 +269,9 @@
     .play-container {
       position: fixed;
       top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
+      left: var(--sw);
+      right: 0;
+      bottom: 0;
     }
     #play-canvas {
       width: 100%;
@@ -565,6 +562,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=14"></script>
+<script type="module" src="play.js?v=15"></script>
 </body>
 </html>

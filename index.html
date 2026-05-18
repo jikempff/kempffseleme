@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>kempff/seleme</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -146,6 +146,26 @@
       -webkit-text-stroke: 1px var(--fg);
     }
     nav a:hover { color: var(--muted); }
+    .shell.play-mode nav a:not(.active) {
+      text-shadow:
+        -2px -2px 0 #fff, 2px -2px 0 #fff,
+        -2px  2px 0 #fff, 2px  2px 0 #fff,
+         0   -2px 0 #fff, 0    2px 0 #fff,
+        -2px  0   0 #fff, 2px  0   0 #fff;
+    }
+    .shell.play-mode nav a.active {
+      text-shadow:
+        -2px -2px 0 #fff, 2px -2px 0 #fff,
+        -2px  2px 0 #fff, 2px  2px 0 #fff,
+         0   -2px 0 #fff, 0    2px 0 #fff,
+        -2px  0   0 #fff, 2px  0   0 #fff;
+    }
+    .shell.play-mode .logo-btn svg {
+      filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff);
+    }
+    .shell.play-mode .social-icons a {
+      filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff);
+    }
 
     .contact-link { margin-top: clamp(16px, 1.8vw, 36px); }
 
@@ -560,6 +580,12 @@
       .social-icons svg { width: 15px; height: 15px; }
       .btn-submit { width: 100%; }
       .form-submit-row { justify-content: stretch; }
+      /* Play buttons: stack vertically, safe from browser chrome */
+      .play-switch { bottom: env(safe-area-inset-bottom, 16px); }
+      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 16px) + 16px); }
+      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 16px) + 16px); }
+      .play-info { bottom: calc(env(safe-area-inset-bottom, 16px) + 56px); }
+      .play-switch { padding: 8px 14px; font-size: 0.55rem; }
     }
   </style>
 </head>
@@ -568,10 +594,10 @@
 
   <!-- Hamburger (mobile only) -->
   <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
-      <line x1="3" y1="6" x2="21" y2="6"/>
-      <line x1="3" y1="12" x2="21" y2="12"/>
-      <line x1="3" y1="18" x2="21" y2="18"/>
+    <svg viewBox="0 0 24 24" fill="var(--fg)">
+      <rect x="3" y="5" width="18" height="2"/>
+      <rect x="3" y="11" width="18" height="2"/>
+      <rect x="3" y="17" width="18" height="2"/>
     </svg>
   </button>
 

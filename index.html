@@ -557,21 +557,23 @@
     .hamburger {
       display: none;
       position: fixed;
-      top: 22px;
+      top: 16px;
       left: 62px;
       z-index: 100;
       background: none;
       border: none;
       cursor: pointer;
-      padding: 4px;
+      padding: 0;
       line-height: 0;
+      height: 36px;
+      align-items: center;
     }
     .hamburger svg { width: 24px; height: 24px; }
 
     /* ── Mobile ── */
     @media (max-width: 540px) {
       .mobile-logo { display: block; }
-      .hamburger { display: block; }
+      .hamburger { display: flex; }
       .sidebar {
         position: fixed;
         top: 0;
@@ -591,6 +593,7 @@
       .logo-btn svg { width: 42px; height: 42px; }
       .logo-btn { margin-bottom: 28px; }
       .content { padding: 22px 20px 40px; padding-top: 56px; }
+      .cv-header { margin-top: 24px; }
       .bio-grid { grid-template-columns: 1fr; }
       .bio-photo { max-width: 280px; height: auto; aspect-ratio: 3/4; }
       .form-row { grid-template-columns: 1fr; }

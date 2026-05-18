@@ -157,6 +157,9 @@
       display: block;
       animation: fadeUp 0.22s ease both;
     }
+    #play.active {
+      animation: none;
+    }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(7px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -579,6 +582,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=17"></script>
+<script type="module" src="play.js?v=18"></script>
 </body>
 </html>

@@ -267,11 +267,9 @@
 
     /* ── Play ── */
     .play-container {
-      position: fixed;
-      top: 0;
-      left: var(--sw);
-      right: 0;
-      bottom: 0;
+      position: relative;
+      width: 100%;
+      height: calc(100vh - clamp(48px, 6vw, 72px));
     }
     #play-canvas {
       width: 100%;
@@ -562,6 +560,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=10"></script>
+<script type="module" src="play.js?v=11"></script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script>
+    // GitHub Pages SPA redirect: serves index.html for clean URLs like /bio, /play, etc.
+    var path = location.pathname;
+    location.replace('/' + '?p=' + path);
+  </script>
+</head>
+<body></body>
+</html>

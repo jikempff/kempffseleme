@@ -539,7 +539,7 @@
 <script>
   const internalPages = ['bio', 'writings', 'play', 'contact'];
 
-  function showPage(id) {
+  function showPage(id, pushState) {
     document.querySelectorAll('.page').forEach(p => {
       p.classList.toggle('active', p.id === id);
     });
@@ -549,7 +549,39 @@
     });
     document.querySelector('.content').classList.toggle('play-active', id === 'play');
     document.querySelector('.shell').classList.toggle('play-mode', id === 'play');
+    if (pushState !== false) {
+      history.pushState(null, '', id === 'home' ? '/' : '/' + id);
+    }
   }
+
+  // Handle back/forward navigation
+  window.addEventListener('popstate', function() {
+    var path = location.pathname.replace(/^\//, '') || 'home';
+    if (internalPages.indexOf(path) !== -1 || path === 'home') {
+      showPage(path, false);
+    }
+  });
+
+  // Load correct page from URL on first visit
+  (function() {
+    // Handle redirect from 404.html
+    var params = new URLSearchParams(location.search);
+    var redirectPath = params.get('p');
+    if (redirectPath) {
+      var cleanPath = redirectPath.replace(/^\//, '');
+      if (internalPages.indexOf(cleanPath) !== -1) {
+        history.replaceState(null, '', '/' + cleanPath);
+        showPage(cleanPath, false);
+        return;
+      } else {
+        history.replaceState(null, '', '/');
+      }
+    }
+    var path = location.pathname.replace(/^\//, '') || 'home';
+    if (internalPages.indexOf(path) !== -1) {
+      showPage(path, false);
+    }
+  })();
 
   function handleSubmit(btn) {
     var form = document.querySelector('.contact-form');
@@ -582,6 +614,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=18"></script>
+<script type="module" src="play.js?v=19"></script>
 </body>
 </html>

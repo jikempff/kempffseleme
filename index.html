@@ -549,7 +549,7 @@
       display: none;
       position: fixed;
       top: 16px;
-      left: 18px;
+      left: 12px;
       z-index: 100;
       background: none;
       border: none;
@@ -558,25 +558,25 @@
       line-height: 0;
     }
     .mobile-logo svg {
-      width: 36px;
-      height: 36px;
+      width: 54px;
+      height: 54px;
       fill: var(--fg);
     }
     .hamburger {
       display: none;
       position: fixed;
       top: 16px;
-      left: 62px;
+      left: 66px;
       z-index: 100;
       background: none;
       border: none;
       cursor: pointer;
       padding: 0;
       line-height: 0;
-      height: 36px;
+      height: 54px;
       align-items: center;
     }
-    .hamburger svg { width: 24px; height: 24px; }
+    .hamburger svg { width: 54px; height: 54px; }
 
     /* ── Mobile ── */
     @media (max-width: 540px) {
@@ -599,8 +599,8 @@
         transform: translateX(0);
       }
       .logo-btn { display: none; }
-      .sidebar { padding-top: 64px; }
-      .content { padding: 22px 20px 40px; padding-top: 56px; }
+      .sidebar { padding-top: 82px; }
+      .content { padding: 22px 20px 40px; padding-top: 82px; }
       .cv-header { margin-top: 24px; }
       .bio-grid { grid-template-columns: 1fr; }
       .bio-photo { max-width: 280px; height: auto; aspect-ratio: 3/4; }
@@ -610,10 +610,10 @@
       .btn-submit { width: 100%; }
       .form-submit-row { justify-content: stretch; }
       /* Play buttons: stack vertically, safe from browser chrome */
-      .play-switch { bottom: env(safe-area-inset-bottom, 16px); }
-      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 16px) + 16px); }
-      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 16px) + 16px); }
-      .play-info { bottom: calc(env(safe-area-inset-bottom, 16px) + 56px); }
+      .play-switch { bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
+      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
+      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
+      .play-info { bottom: calc(env(safe-area-inset-bottom, 20px) + 104px); }
       .play-switch { padding: 8px 14px; font-size: 0.55rem; }
     }
   </style>

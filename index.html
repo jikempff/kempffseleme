@@ -1228,6 +1228,11 @@
     document.querySelector('.content').classList.toggle('play-active', id === 'play');
     document.querySelector('.shell').classList.toggle('play-mode', id === 'play');
     closeMenu();
+    // Reset scroll and force iOS Safari to recalculate layout/safe areas
+    window.scrollTo(0, 0);
+    document.body.style.display = 'none';
+    document.body.offsetHeight;
+    document.body.style.display = '';
     if (pushState !== false) {
       history.pushState(null, '', id === 'home' ? '/' : '/' + id);
     }

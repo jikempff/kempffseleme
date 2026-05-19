@@ -511,6 +511,7 @@
     .play-switch-prev { left: 20px; }
     .play-switch:hover { background: #333; transform: translateY(-2px); }
     .play-switch svg { stroke: var(--bg); }
+
     .play-info {
       position: absolute;
       bottom: 20px;
@@ -520,6 +521,10 @@
       text-align: center;
       white-space: nowrap;
       font-family: inherit;
+    }
+    .play-slider {
+      position: absolute;
+      z-index: 1;
     }
     .play-title {
       font-size: 0.7rem;
@@ -750,11 +755,12 @@
       .btn-submit { width: 100%; }
       .form-submit-row { justify-content: stretch; }
       /* Play buttons: safe from browser chrome */
-      .play-switch { bottom: calc(env(safe-area-inset-bottom, 20px) + 84px); }
-      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 84px); }
-      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 84px); }
-      .play-info { bottom: calc(env(safe-area-inset-bottom, 20px) + 124px); }
+      .play-switch { bottom: calc(env(safe-area-inset-bottom, 20px) + 24px); }
+      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 24px); }
+      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 24px); }
+      .play-info { bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
       .play-switch { padding: 8px 14px; font-size: 0.55rem; }
+      .play-slider { bottom: calc(env(safe-area-inset-bottom, 20px) + 30px) !important; width: 140px !important; }
     }
   </style>
 </head>
@@ -1312,6 +1318,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=22"></script>
+<script type="module" src="play.js?v=23"></script>
 </body>
 </html>

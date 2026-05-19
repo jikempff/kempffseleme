@@ -546,7 +546,8 @@ function createRelaxMesh() {
   sliderEl.min = '0';
   sliderEl.max = '100';
   sliderEl.value = '50';
-  sliderEl.style.cssText = 'position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:180px;opacity:0.7;accent-color:#000;';
+  sliderEl.className = 'play-slider';
+  sliderEl.style.cssText = 'position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:180px;opacity:0.7;accent-color:#000;z-index:1;';
   canvas.parentElement.appendChild(sliderEl);
   sliderEl.addEventListener('input', function() {
     load = sliderEl.value / 100;

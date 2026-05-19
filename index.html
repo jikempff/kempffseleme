@@ -466,7 +466,7 @@
       top: 0;
       left: 0;
       width: 100vw;
-      height: 100vh;
+      height: 100dvh;
       z-index: 0;
     }
     #play-canvas {
@@ -656,16 +656,59 @@
         top: 0;
         left: 0;
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         padding: 22px 20px 20px;
         min-width: 0;
         z-index: 99;
-        background: var(--bg);
-        transform: translateX(-100%);
-        transition: transform 0.25s ease;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
       }
       .sidebar.open {
+        opacity: 1;
+        pointer-events: auto;
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* Nav item stagger — slide from left */
+      .sidebar nav a {
+        opacity: 0;
+        transform: translateX(-28px);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+      }
+      .sidebar.open nav a {
+        opacity: 1;
         transform: translateX(0);
+        transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .sidebar.open nav a:nth-child(1) { transition-delay: 0.08s; }
+      .sidebar.open nav a:nth-child(2) { transition-delay: 0.13s; }
+      .sidebar.open nav a:nth-child(3) { transition-delay: 0.18s; }
+      .sidebar.open nav a:nth-child(4) { transition-delay: 0.23s; }
+      .sidebar.open nav a:nth-child(5) { transition-delay: 0.28s; }
+      .sidebar.open nav a:nth-child(6) { transition-delay: 0.33s; }
+      /* Social icons stagger */
+      .sidebar .social-icons {
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+      }
+      .sidebar.open .social-icons {
+        opacity: 1;
+        transform: translateX(0);
+        transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        transition-delay: 0.34s;
+      }
+      /* Overlay behind menu (invisible, just catches taps to close) */
+      .menu-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100dvh;
+        background: transparent;
+        z-index: 98;
+        pointer-events: none;
+      }
+      .menu-overlay.active {
+        pointer-events: auto;
       }
       .logo-btn { display: none; }
       .sidebar { padding-top: 82px; }
@@ -704,6 +747,7 @@
       <rect x="255.1" y="106.25" width="56.7" height="354.4" transform="translate(566.9 0) rotate(90)"/>
     </svg>
   </button>
+  <div class="menu-overlay" onclick="closeMenu()"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -1153,10 +1197,14 @@
   const internalPages = ['bio', 'writings', 'play', 'cv', 'contact'];
 
   function toggleMenu() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.menu-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
   }
   function closeMenu() {
     document.querySelector('.sidebar').classList.remove('open');
+    document.querySelector('.menu-overlay').classList.remove('active');
   }
 
   function showPage(id, pushState) {

@@ -351,6 +351,7 @@
     .cv-contact {
       font-size: inherit;
       line-height: 1.6;
+      container-type: inline-size;
     }
     .cv-contact a { color: var(--fg); text-decoration: none; transition: color 0.2s ease; }
     .cv-contact a:hover { color: var(--muted); }
@@ -444,6 +445,12 @@
     .cv-refs a { color: var(--fg); text-decoration: none; transition: color 0.2s ease; }
     .cv-refs a:hover { color: var(--muted); }
     .cv-phones { white-space: nowrap; }
+    .cv-phone { white-space: nowrap; }
+    @container (max-width: 400px) {
+      .cv-phones { white-space: normal; }
+      .cv-phone { display: block; }
+      .cv-phone-sep { display: none; }
+    }
     .cv-download {
       display: inline-block;
       margin-top: clamp(8px, 1vw, 16px);
@@ -460,9 +467,7 @@
     .cv-download:hover { background: #333; transform: translateY(-1px); }
     @media (max-width: 540px) {
       .cv-two-col { grid-template-columns: 1fr; }
-      .cv-phones { white-space: normal; }
-      .cv-phone { display: inline-block; }
-      .cv-phone-sep { display: none; }
+      /* Phones layout handled by @container query on .cv-contact */
     }
 
     /* ── Play ── */

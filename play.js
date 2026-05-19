@@ -31,6 +31,22 @@ function resize() {
   renderer.setSize(w, h, false);
 }
 
+// Portrait-aware frustum: 'fill' zooms out for dense/tiling content,
+// 'fit' zooms in slightly for centered/compact content
+function adaptFrustum(baseFrustum, aspect, mode) {
+  if (aspect >= 1) return baseFrustum;
+  if (mode === 'fill') return baseFrustum / aspect;
+  // 'fit': zoom in to reduce vertical white space on portrait
+  return baseFrustum * Math.max(aspect, 0.65);
+}
+function setCamFrustum(cam, baseFrustum, aspect, mode) {
+  var f = adaptFrustum(baseFrustum, aspect, mode || 'fit');
+  cam.left = -f * aspect;
+  cam.right = f * aspect;
+  cam.top = f;
+  cam.bottom = -f;
+}
+
 var toyNames = ['bricks', 'shadows', 'wave', 'mesh', 'l-system', 'swarm'];
 var toyInstructions = [
   'move cursor to rotate bricks',
@@ -139,10 +155,7 @@ function createBrickWall() {
       b.rotation.y = b.userData.rotY;
     }
 
-    cam.left = -frustum * a2;
-    cam.right = frustum * a2;
-    cam.top = frustum;
-    cam.bottom = -frustum;
+    setCamFrustum(cam, frustum, a2, 'fill');
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);
@@ -389,10 +402,7 @@ function createSunCity() {
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;
-    cam.left = -frustum * a2;
-    cam.right = frustum * a2;
-    cam.top = frustum;
-    cam.bottom = -frustum;
+    setCamFrustum(cam, frustum, a2);
     cam.updateProjectionMatrix();
     resize();
     renderer.sortObjects = false;
@@ -478,10 +488,7 @@ function createWaveGrid() {
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;
-    cam.left = -frustum * a2;
-    cam.right = frustum * a2;
-    cam.top = frustum;
-    cam.bottom = -frustum;
+    setCamFrustum(cam, frustum, a2);
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);
@@ -599,10 +606,7 @@ function createRelaxMesh() {
 
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;
-    cam.left = -frustum * a2;
-    cam.right = frustum * a2;
-    cam.top = frustum;
-    cam.bottom = -frustum;
+    setCamFrustum(cam, frustum, a2);
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);
@@ -631,7 +635,8 @@ function createLSystem() {
   cam.lookAt(0, 0, 0);
 
   var treeGroup = new THREE.Group();
-  treeGroup.position.y = -frustum * 0.85;
+  var w0 = canvas.clientWidth, h0 = canvas.clientHeight;
+  treeGroup.position.y = -adaptFrustum(frustum, w0 / h0) * 0.85;
   scene.add(treeGroup);
 
   var lineMat = new THREE.LineBasicMaterial({ color: '#000000' });
@@ -712,10 +717,7 @@ function createLSystem() {
     animId = requestAnimationFrame(animate);
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;
-    cam.left = -frustum * a2;
-    cam.right = frustum * a2;
-    cam.top = frustum;
-    cam.bottom = -frustum;
+    setCamFrustum(cam, frustum, a2);
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);
@@ -758,8 +760,9 @@ function createSwarm() {
     var size = 1 + Math.random() * 2;
     var geo = new THREE.CircleGeometry(size, 8);
     var mesh = new THREE.Mesh(geo, particleMat);
-    var px = (Math.random() - 0.5) * frustum * aspect * 1.5;
-    var py = (Math.random() - 0.5) * frustum * 1.5;
+    var initF = adaptFrustum(frustum, aspect, 'fill');
+    var px = (Math.random() - 0.5) * initF * aspect * 1.5;
+    var py = (Math.random() - 0.5) * initF * 1.5;
     mesh.position.set(px, py, 0);
     scene.add(mesh);
     particleMeshes.push(mesh);
@@ -784,8 +787,9 @@ function createSwarm() {
     var w2 = canvas.clientWidth, h2 = canvas.clientHeight;
     var a2 = w2 / h2;
 
-    var ax = mouse.x * frustum * a2;
-    var ay = mouse.y * frustum;
+    var af = adaptFrustum(frustum, a2, 'fill');
+    var ax = mouse.x * af * a2;
+    var ay = mouse.y * af;
     attractor.position.set(ax, ay, 1);
 
     for (var i = 0; i < particles.length; i++) {
@@ -832,10 +836,7 @@ function createSwarm() {
       trail.line.geometry.attributes.position.needsUpdate = true;
     }
 
-    cam.left = -frustum * a2;
-    cam.right = frustum * a2;
-    cam.top = frustum;
-    cam.bottom = -frustum;
+    setCamFrustum(cam, frustum, a2, 'fill');
     cam.updateProjectionMatrix();
     resize();
     renderer.render(scene, cam);

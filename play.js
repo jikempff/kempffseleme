@@ -27,7 +27,7 @@ function initPlay() {
 
 function resize() {
   if (!canvas || !renderer) return;
-  var w = canvas.clientWidth, h = canvas.clientHeight;
+  var w = window.innerWidth, h = window.innerHeight;
   renderer.setSize(w, h, false);
 }
 

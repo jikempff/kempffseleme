@@ -90,6 +90,7 @@
       display: flex;
       height: 100vh;
       width: 100vw;
+      background: var(--bg);
     }
 
     /* ── Sidebar ─────────────────────────────── */
@@ -610,16 +611,16 @@
     /* ── Tablet (portrait) ── */
     @media (max-width: 860px) {
       html { height: 100%; }
-      body { height: auto; min-height: 100%; overflow-y: auto; }
+      body { height: auto; min-height: 100dvh; overflow-y: auto; }
       :root { --sw: 100%; }
-      .shell { flex-direction: column; height: auto; min-height: 100%; }
+      .shell { flex-direction: column; height: auto; min-height: 100dvh; }
       .sidebar {
         width: 100%;
         min-width: 0;
         height: auto;
         padding: 28px 28px 24px;
       }
-      .content { height: auto; overflow: visible; padding: calc(env(safe-area-inset-top, 0px) + 28px) 28px calc(env(safe-area-inset-bottom, 0px) + 48px); }
+      .content { flex: 1; height: auto; overflow: visible; padding: calc(env(safe-area-inset-top, 0px) + 28px) 28px calc(env(safe-area-inset-bottom, 0px) + 48px); }
       .bio-grid { grid-template-columns: 1fr 1fr; }
       .bio-photo { height: auto; aspect-ratio: 3/4; }
     }
@@ -1234,11 +1235,7 @@
     document.querySelector('.content').classList.toggle('play-active', id === 'play');
     document.querySelector('.shell').classList.toggle('play-mode', id === 'play');
     closeMenu();
-    // Reset scroll and force iOS Safari to recalculate layout/safe areas
     window.scrollTo(0, 0);
-    document.body.style.display = 'none';
-    document.body.offsetHeight;
-    document.body.style.display = '';
     if (pushState !== false) {
       history.pushState(null, '', id === 'home' ? '/' : '/' + id);
     }

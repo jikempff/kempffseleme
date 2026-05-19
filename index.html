@@ -610,9 +610,9 @@
         width: 100%;
         min-width: 0;
         height: auto;
-        padding: 28px 28px 24px;
+        padding: calc(env(safe-area-inset-top, 0px) + 28px) 28px 24px;
       }
-      .content { height: auto; overflow: visible; padding: 28px 28px 48px; }
+      .content { height: auto; overflow: visible; padding: 28px 28px calc(env(safe-area-inset-bottom, 0px) + 48px); }
       .bio-grid { grid-template-columns: 1fr 1fr; }
       .bio-photo { height: auto; aspect-ratio: 3/4; }
     }

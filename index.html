@@ -479,8 +479,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100dvh;
+      right: 0;
+      bottom: 0;
       z-index: 0;
     }
     #play-canvas {
@@ -749,11 +749,11 @@
       .social-icons svg { width: 15px; height: 15px; }
       .btn-submit { width: 100%; }
       .form-submit-row { justify-content: stretch; }
-      /* Play buttons: stack vertically, safe from browser chrome */
-      .play-switch { bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
-      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
-      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 64px); }
-      .play-info { bottom: calc(env(safe-area-inset-bottom, 20px) + 104px); }
+      /* Play buttons: safe from browser chrome */
+      .play-switch { bottom: calc(env(safe-area-inset-bottom, 20px) + 84px); }
+      .play-switch-prev { left: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 84px); }
+      .play-switch-next { right: 12px; bottom: calc(env(safe-area-inset-bottom, 20px) + 84px); }
+      .play-info { bottom: calc(env(safe-area-inset-bottom, 20px) + 124px); }
       .play-switch { padding: 8px 14px; font-size: 0.55rem; }
     }
   </style>

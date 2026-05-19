@@ -72,11 +72,11 @@
     }
 
     html {
-      background: var(--bg);
+      background-color: var(--bg);
     }
     body {
       height: 100%;
-      background: var(--bg);
+      background-color: var(--bg);
       color: var(--fg);
       font-family: 'Sohne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-weight: 400;
@@ -610,8 +610,8 @@
 
     /* ── Tablet (portrait) ── */
     @media (max-width: 860px) {
-      html { height: 100%; }
-      body { height: auto; min-height: 100dvh; overflow-y: auto; }
+      html { min-height: 100%; overflow-y: scroll; overscroll-behavior: none; }
+      body { height: auto; min-height: calc(100dvh + 1px); overflow-y: auto; }
       :root { --sw: 100%; }
       .shell { flex-direction: column; height: auto; min-height: 100dvh; }
       .sidebar {
@@ -672,14 +672,18 @@
         padding: 22px 20px 20px;
         min-width: 0;
         z-index: 99;
+        display: none;
         opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.25s ease;
       }
       .sidebar.open {
+        display: flex;
         opacity: 1;
         pointer-events: auto;
-        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: sidebarFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes sidebarFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
       /* Nav item stagger — slide from left */
       .sidebar nav a {
@@ -1235,7 +1239,9 @@
     document.querySelector('.content').classList.toggle('play-active', id === 'play');
     document.querySelector('.shell').classList.toggle('play-mode', id === 'play');
     closeMenu();
-    window.scrollTo(0, 0);
+    // Scroll to 1px (not 0) — Safari 26 Liquid Glass needs non-zero scroll
+    // to composite real page pixels behind the toolbar chrome
+    window.scrollTo(0, 1);
     if (pushState !== false) {
       history.pushState(null, '', id === 'home' ? '/' : '/' + id);
     }
@@ -1267,6 +1273,9 @@
     var path = location.pathname.replace(/^\//, '') || 'home';
     if (internalPages.indexOf(path) !== -1) {
       showPage(path, false);
+    } else {
+      // Home page — still need non-zero scroll for Safari 26 Liquid Glass
+      window.scrollTo(0, 1);
     }
   })();
 

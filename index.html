@@ -715,6 +715,11 @@
         pointer-events: auto;
       }
       .logo-btn { display: none; }
+      /* In play mode on mobile: disable pointer-events on hidden sidebar children */
+      .shell.play-mode .sidebar * { pointer-events: none; }
+      /* When menu is open in play mode, restore background + pointer events */
+      .shell.play-mode .sidebar.open { background: var(--bg); pointer-events: auto; }
+      .shell.play-mode .sidebar.open * { pointer-events: auto; }
       .sidebar { padding-top: calc(env(safe-area-inset-top, 0px) + 82px); }
       .content { padding: 22px 20px calc(env(safe-area-inset-bottom, 0px) + 40px); padding-top: calc(env(safe-area-inset-top, 0px) + 82px); }
       .cv-header { margin-top: 24px; }

@@ -864,6 +864,11 @@ function hookShowPage() {
       if (animId) { cancelAnimationFrame(animId); animId = null; }
     }
   };
+  // If play page is already active (e.g. page refreshed on /play URL), init now
+  var playPage = document.getElementById('play');
+  if (playPage && playPage.classList.contains('active') && !renderer) {
+    setTimeout(function() { initPlay(); }, 0);
+  }
 }
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', hookShowPage);

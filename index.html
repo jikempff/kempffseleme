@@ -604,10 +604,6 @@
     /* ── Tablet (portrait) ── */
     @media (max-width: 860px) {
       html, body { overflow: auto; }
-      body {
-        padding-top: env(safe-area-inset-top, 0px);
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-      }
       :root { --sw: 100%; }
       .shell { flex-direction: column; height: auto; }
       .sidebar {
@@ -616,7 +612,7 @@
         height: auto;
         padding: 28px 28px 24px;
       }
-      .content { height: auto; overflow: visible; padding: 28px 28px 48px; }
+      .content { height: auto; overflow: visible; padding: calc(env(safe-area-inset-top, 0px) + 28px) 28px calc(env(safe-area-inset-bottom, 0px) + 48px); }
       .bio-grid { grid-template-columns: 1fr 1fr; }
       .bio-photo { height: auto; aspect-ratio: 3/4; }
     }
@@ -719,8 +715,8 @@
         pointer-events: auto;
       }
       .logo-btn { display: none; }
-      .sidebar { padding-top: 82px; }
-      .content { padding: 22px 20px 40px; padding-top: 82px; }
+      .sidebar { padding-top: calc(env(safe-area-inset-top, 0px) + 82px); }
+      .content { padding: 22px 20px calc(env(safe-area-inset-bottom, 0px) + 40px); padding-top: calc(env(safe-area-inset-top, 0px) + 82px); }
       .cv-header { margin-top: 24px; }
       .bio-grid { grid-template-columns: 1fr; }
       .bio-photo { max-width: 280px; height: auto; aspect-ratio: 3/4; }
@@ -1291,6 +1287,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=21"></script>
+<script type="module" src="play.js?v=22"></script>
 </body>
 </html>

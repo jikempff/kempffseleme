@@ -617,8 +617,8 @@
     .mobile-logo {
       display: none;
       position: fixed;
-      top: 16px;
-      left: 12px;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      left: calc(env(safe-area-inset-left, 0px) + 12px);
       z-index: 100;
       background: none;
       border: none;
@@ -634,8 +634,8 @@
     .hamburger {
       display: none;
       position: fixed;
-      top: 16px;
-      left: 66px;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      left: calc(env(safe-area-inset-left, 0px) + 66px);
       z-index: 100;
       background: none;
       border: none;
@@ -711,8 +711,8 @@
         pointer-events: auto;
       }
       .logo-btn { display: none; }
-      .sidebar { padding-top: 82px; }
-      .content { padding: 22px 20px 40px; padding-top: 82px; }
+      .sidebar { padding-top: calc(env(safe-area-inset-top, 0px) + 82px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .content { padding: 22px 20px calc(env(safe-area-inset-bottom, 0px) + 40px); padding-top: calc(env(safe-area-inset-top, 0px) + 82px); }
       .cv-header { margin-top: 24px; }
       .bio-grid { grid-template-columns: 1fr; }
       .bio-photo { max-width: 280px; height: auto; aspect-ratio: 3/4; }

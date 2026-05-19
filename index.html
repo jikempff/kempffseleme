@@ -440,8 +440,11 @@
     .cv-refs {
       line-height: 1.6;
     }
+    .cv-ref { margin-bottom: 4px; }
+    .cv-ref:last-child { margin-bottom: 0; }
     .cv-refs a { color: var(--fg); text-decoration: none; transition: color 0.2s ease; }
     .cv-refs a:hover { color: var(--muted); }
+    .cv-phones { white-space: nowrap; }
     .cv-download {
       display: inline-block;
       margin-top: clamp(8px, 1vw, 16px);
@@ -458,6 +461,9 @@
     .cv-download:hover { background: #333; transform: translateY(-1px); }
     @media (max-width: 540px) {
       .cv-two-col { grid-template-columns: 1fr; }
+      .cv-phones { white-space: normal; }
+      .cv-phone { display: inline-block; }
+      .cv-phone-sep { display: none; }
     }
 
     /* ── Play ── */
@@ -863,7 +869,7 @@
           <div class="cv-name">jos&eacute; i. kempff seleme</div>
           <div class="cv-contact">
             <a href="mailto:joseignacio@kempffsele.me" class="cv-light-italic">joseignacio@kempffsele.me</a><br>
-            UK: (+44) 7446524068 &nbsp;&middot;&nbsp; ES: (+34) 610 94 25 14
+            <span class="cv-phones"><span class="cv-phone">UK: (+44) 7446524068</span> <span class="cv-phone-sep">&middot;</span> <span class="cv-phone">ES: (+34) 610 94 25 14</span></span>
           </div>
         </div>
 
@@ -1138,11 +1144,11 @@
         <div class="cv-section">
           <div class="cv-section-title">references</div>
           <div class="cv-refs">
-            Martha Tsigkari &middot; <a href="mailto:m.tsigkari@ucl.ac.uk" class="cv-light-italic">m.tsigkari@ucl.ac.uk</a><br>
-            Javier Francisco Raposo Grau &middot; <a href="mailto:javierfrancisco.raposo@upm.es" class="cv-light-italic">javierfrancisco.raposo@upm.es</a><br>
-            V&iacute;ctor Navarro R&iacute;os &middot; <a href="mailto:victor@langarita-navarro.com" class="cv-light-italic">victor@langarita-navarro.com</a><br>
-            Sergio del Castello Tello &middot; <a href="mailto:miautics@miautics.com" class="cv-light-italic">miautics@miautics.com</a><br>
-            Ant&oacute;n Garc&iacute;a-Abril &middot; <a href="mailto:anton@ensamble.com" class="cv-light-italic">anton@ensamble.com</a>
+            <div class="cv-ref">Martha Tsigkari<br><a href="mailto:m.tsigkari@ucl.ac.uk" class="cv-light-italic">m.tsigkari@ucl.ac.uk</a></div>
+            <div class="cv-ref">Javier Francisco Raposo Grau<br><a href="mailto:javierfrancisco.raposo@upm.es" class="cv-light-italic">javierfrancisco.raposo@upm.es</a></div>
+            <div class="cv-ref">V&iacute;ctor Navarro R&iacute;os<br><a href="mailto:victor@langarita-navarro.com" class="cv-light-italic">victor@langarita-navarro.com</a></div>
+            <div class="cv-ref">Sergio del Castello Tello<br><a href="mailto:miautics@miautics.com" class="cv-light-italic">miautics@miautics.com</a></div>
+            <div class="cv-ref">Ant&oacute;n Garc&iacute;a-Abril<br><a href="mailto:anton@ensamble.com" class="cv-light-italic">anton@ensamble.com</a></div>
           </div>
         </div>
 

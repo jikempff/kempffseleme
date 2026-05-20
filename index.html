@@ -477,12 +477,11 @@
     }
     .play-container {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: calc(-1 * env(safe-area-inset-top, 0px));
+      left: calc(-1 * env(safe-area-inset-left, 0px));
+      right: calc(-1 * env(safe-area-inset-right, 0px));
+      bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
       z-index: 0;
-      background: red;
     }
     #play-canvas {
       width: 100%;
@@ -1319,6 +1318,6 @@
     });
   }
 </script>
-<script type="module" src="play.js?v=28"></script>
+<script type="module" src="play.js?v=29"></script>
 </body>
 </html>

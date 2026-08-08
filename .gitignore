@@ -11,3 +11,9 @@
 
 # Logs
 *.log
+
+# Licensed desktop fonts — never commit these.
+# Only the subsetted .woff2 files in fonts/ belong in this repo.
+*.otf
+*.ttf
+_to_delete/

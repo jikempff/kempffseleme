@@ -5235,6 +5235,7 @@ var _sin = Module['_sin'] = (a0) => (_sin = Module['_sin'] = wasmExports['sin'])
 var _cos = Module['_cos'] = (a0) => (_cos = Module['_cos'] = wasmExports['cos'])(a0);
 var _memset = Module['_memset'] = (a0, a1, a2) => (_memset = Module['_memset'] = wasmExports['memset'])(a0, a1, a2);
 var _pow = Module['_pow'] = (a0, a1) => (_pow = Module['_pow'] = wasmExports['pow'])(a0, a1);
+var _exp = Module['_exp'] = (a0) => (_exp = Module['_exp'] = wasmExports['exp'])(a0);
 var _mono_aot_Mite_Core_get_method = Module['_mono_aot_Mite_Core_get_method'] = (a0) => (_mono_aot_Mite_Core_get_method = Module['_mono_aot_Mite_Core_get_method'] = wasmExports['mono_aot_Mite_Core_get_method'])(a0);
 var _mono_aot_Mite_Web_get_method = Module['_mono_aot_Mite_Web_get_method'] = (a0) => (_mono_aot_Mite_Web_get_method = Module['_mono_aot_Mite_Web_get_method'] = wasmExports['mono_aot_Mite_Web_get_method'])(a0);
 var _mono_aot_System_Collections_Concurrent_get_method = Module['_mono_aot_System_Collections_Concurrent_get_method'] = (a0) => (_mono_aot_System_Collections_Concurrent_get_method = Module['_mono_aot_System_Collections_Concurrent_get_method'] = wasmExports['mono_aot_System_Collections_Concurrent_get_method'])(a0);
@@ -5268,7 +5269,6 @@ var _atan = Module['_atan'] = (a0) => (_atan = Module['_atan'] = wasmExports['at
 var _atanh = Module['_atanh'] = (a0) => (_atanh = Module['_atanh'] = wasmExports['atanh'])(a0);
 var _cbrt = Module['_cbrt'] = (a0) => (_cbrt = Module['_cbrt'] = wasmExports['cbrt'])(a0);
 var _cosh = Module['_cosh'] = (a0) => (_cosh = Module['_cosh'] = wasmExports['cosh'])(a0);
-var _exp = Module['_exp'] = (a0) => (_exp = Module['_exp'] = wasmExports['exp'])(a0);
 var _log = Module['_log'] = (a0) => (_log = Module['_log'] = wasmExports['log'])(a0);
 var _log2 = Module['_log2'] = (a0) => (_log2 = Module['_log2'] = wasmExports['log2'])(a0);
 var _log10 = Module['_log10'] = (a0) => (_log10 = Module['_log10'] = wasmExports['log10'])(a0);

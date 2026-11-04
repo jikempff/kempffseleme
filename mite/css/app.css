@@ -8,7 +8,7 @@
 
 :root {
   --bg: #ffffff; --surface: #fafafa; --surface2: #f1f1f1; --line: #e2e2e2; --ink: #0a0a0a; --muted: #6b6b6b; --faint: #a0a0a0;
-  --famA: #2a3cff; --famB: #ff1f4f; --famG: #00c865; --neon: #00ff85; --accent: #0a0a0a; --warn: #ff1f4f; --ok: #00a653;
+  --famA: #2a3cff; --famB: #ff1f4f; --famG: #00a653; --neon: #00ff85; --accent: #0a0a0a; --warn: #ff1f4f; --ok: #00a653;
   --sans: 'Sohne', 'Helvetica Neue', Helvetica, Arial, sans-serif; --mono: 'Sohne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --panel-w: 360px;
 }
@@ -42,9 +42,16 @@ button, input, select { font: inherit; color: inherit; }
 .hud-tr { top: 12px; right: 14px; text-align: right; }
 .hud-bl { bottom: 10px; left: 14px; right: 14px; display: flex; flex-direction: column; gap: 6px; }
 .hint { color: var(--faint); }
-.legend { display: inline-flex; align-items: center; gap: 8px; pointer-events: none; }
-.legend i { display: inline-block; width: 160px; height: 8px; border-radius: 3px; border: 1px solid var(--line); }
-.legend b { font-weight: 400; color: var(--ink); margin-left: 6px; }
+/* colour-bar legends in the viewport (scoped: the panel's marker legend below shares the class and used to shrink this bar to 9 px) */
+.hud-bl .legend { display: inline-flex; align-items: center; gap: 8px; pointer-events: none; }
+.hud-bl .legend i { display: inline-block; position: relative; width: 200px; height: 8px; border-radius: 3px; border: 1px solid var(--line); margin: 0; }
+.hud-bl .legend i em { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--ink); opacity: 0.8; }
+.hud-bl .legend i em span { position: absolute; top: 9px; left: 0; transform: translateX(-50%); font: 10px var(--mono); color: var(--muted); white-space: nowrap; }
+.hud-bl .legend:has(i em) { margin-bottom: 12px; }
+.hud-bl .legend b { font-weight: 400; color: var(--ink); margin-left: 6px; }
+.labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.labels .label { position: absolute; left: 0; top: 0; transform: translate(-1000px, -1000px); font: 11px/1 var(--mono); color: var(--ink); background: color-mix(in srgb, var(--bg) 80%, transparent); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; margin: -9px 0 0 6px; white-space: nowrap; }
+.labels .label.dim { opacity: 0.18; }
 .hidden { display: none !important; }
 
 .drop { position: absolute; inset: 12px; border: 2px dashed var(--ink); border-radius: 10px; display: grid; place-items: center; font-size: 18px; color: var(--ink); background: color-mix(in srgb, var(--bg) 80%, transparent); pointer-events: none; }
@@ -141,6 +148,7 @@ button, input, select { font: inherit; color: inherit; }
 .mini { width: 100%; height: 44px; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; margin-top: 4px; }
 .ends { font-size: 12px; color: var(--muted); line-height: 1.7; }
 .ends i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.boards { width: 100%; height: 120px; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; margin-top: 4px; }
 .buildbar { height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; margin-top: 8px; border: 1px solid var(--line); }
 .buildbar i { display: block; height: 100%; background: var(--neon); }
 .btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }

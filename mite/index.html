@@ -39,6 +39,7 @@
     <div class="hud hud-bl">
       <div id="legend" class="legend hidden"><span id="legend-min"></span><i id="legend-bar"></i><span id="legend-max"></span><b id="legend-title"></b></div>
       <div id="ulegend" class="legend hidden"><span>0</span><i id="ulegend-bar"></i><span>1.3+</span><b id="ulegend-title">lath utilization · 1 = limit</b></div>
+      <div id="clegend" class="legend hidden"><span id="clegend-min">45°</span><i id="clegend-bar"></i><span id="clegend-max">135°</span><b id="clegend-title">shear angle · 90° = square cell · black = locked</b></div>
       <div class="hint">drag orbit · right-drag pan · scroll zoom · hover / click a curve · shift-click the surface to move the seed · drag the orange knob to turn the seed direction</div>
     </div>
     <div class="hud hud-tr" id="hud-net"></div>
@@ -78,7 +79,7 @@
       <div class="row slider"><label for="smooth">smoothing rings</label><input id="smooth" type="range" min="1" max="4" step="1" value="2"><output for="smooth">2</output></div>
       <div class="row toggles">
         <label class="chk" title="Grasshopper: Principal Curvature → D1, D2"><input id="dirs" type="checkbox"> principal directions</label>
-        <label class="chk" title="Grasshopper: Umbilics"><input id="umb" type="checkbox"> umbilics</label>
+        <label class="chk" title="Grasshopper: Umbilics — yellow: vertices with k1 ≈ k2; red: isolated umbilics of index +½ (lemon / monstar); blue: index −½ (star)"><input id="umb" type="checkbox"> umbilics</label>
         <label class="chk"><input id="wire" type="checkbox"> wireframe</label>
       </div>
       <p id="mode-note" class="note"></p>
@@ -105,6 +106,7 @@
             <button data-layout="3" class="on" data-only="asymptotic" title="Schling: nodes placed every spacing along the two asymptotic curves through the seed; every other node is the crossing of the curves through them. A quad net — no stubs, no T-junctions — that carries the surface's symmetry (flat points become singular nodes, surfaces of revolution a rotational web)">symmetric web</button>
             <button data-layout="1" title="Grasshopper: Layout = 1 — seeds every Spacing along the border; every curve runs border to border, none stops on a neighbour">web · border</button>
             <button data-layout="2" title="Grasshopper: Layout = 2 — seeds every Spacing along the crossing curve through the seed; every curve runs border to border">web · seed cross</button>
+            <button data-layout="4" title="Grasshopper: Guide input — a seed curve pulled onto the mesh with nodes every Spacing of arc length along it; one curve of each family through every node (Schling's layout). Here the guide is the horizontal section through the seed; drag the seed to move it">web · guide</button>
             <button data-layout="0" title="Grasshopper: Layout = 0 — evenly spaced streamlines (Jobard–Lefer): curves inserted where the spacing opens and stopped where it closes, ending on a neighbour as a T-junction">fill · evenly spaced</button>
           </div>
         </div>
@@ -113,6 +115,10 @@
         <div class="row slider" data-for="chebyshev"><label for="edge">edge length</label><input id="edge" type="range" min="2" max="20" step="0.5" value="6"><output for="edge" id="edge-out">–</output></div>
         <div class="row slider" data-for="chebyshev"><label for="count">nodes per side</label><input id="count" type="range" min="2" max="24" step="1" value="8"><output for="count">8</output></div>
         <div class="row slider" data-for="geodesicBoth chebyshev"><label for="famangle">family angle <span class="unit">°</span></label><input id="famangle" type="range" min="30" max="150" step="5" value="90"><output for="famangle">90</output></div>
+        <div class="row toggles" data-for="chebyshev">
+          <label class="chk" title="Every cell coloured by the angle between the two laths at its nodes: blue where the net closes (below 90°), red where it opens (above), black past the lock angle. Grasshopper: the Angles output of Chebyshev Net"><input id="anglemap" type="checkbox" checked> angle map</label>
+        </div>
+        <div class="row slider" data-for="chebyshev"><label for="lockangle" title="The shear the material can take: Garg et al. 2014 measured an exponential rise of the shearing force of wire mesh from 45° (cells outside 45° … 135°); Sageman-Furnas et al. 2019 use 30°">lock angle <span class="unit">°</span></label><input id="lockangle" type="range" min="20" max="80" step="5" value="45"><output for="lockangle">45</output></div>
         <div class="row" data-for="asymptotic" id="sym-row"><label for="symmetry">symmetry</label><select id="symmetry"><option value="-1">detect</option><option value="0">none</option><option value="2">2-fold</option><option value="3">3-fold</option><option value="4">4-fold</option><option value="6">6-fold</option></select></div>
         <div class="row toggles" data-for="asymptotic" id="aag-row">
           <label class="chk" title="The quad diagonals of the web that come closest to geodesics: a third family of flat slats (Schling, Wang, Hoyer & Pottmann 2022)"><input id="diagonals" type="checkbox"> <i class="sw swG"></i> geodesic diagonals (AAG)</label>
@@ -121,11 +127,18 @@
         <p id="aag-stats" class="stats hidden"></p>
         <div class="row slider" data-for="asymptotic"><label for="minangle">min crossing <span class="unit">°</span></label><input id="minangle" type="range" min="0" max="45" step="1" value="15"><output for="minangle">15</output></div>
         <div class="row slider" data-for="isocurves"><label for="levels">levels</label><input id="levels" type="range" min="3" max="40" step="1" value="12"><output for="levels">12</output></div>
-        <div class="row" data-for="isocurves"><label for="isofield">field</label><select id="isofield"><option value="K">Gaussian K</option><option value="H">Mean H</option><option value="k1">k1</option><option value="k2">k2</option><option value="z">height z</option></select></div>
+        <div class="row" data-for="isocurves"><label for="isofield">field</label><select id="isofield"><option value="K">Gaussian K</option><option value="H">Mean H</option><option value="k1">k1</option><option value="k2">k2</option><option value="z">height z</option></select>
+          <label class="chk" title="The level value on every curve, at its midpoint; faded where the surface hides it. Grasshopper: one branch per level — Text Tag the branch index"><input id="isolabels" type="checkbox" checked> labels</label></div>
         <div class="row toggles" data-for="asymptotic conjugate geodesic geodesicBoth streamMax streamMin">
           <label class="chk" id="continuous-row"><input id="continuous" type="checkbox" checked> continuous <span class="unit">fill: run to the border</span></label>
           <label class="chk"><input id="crossings" type="checkbox"> crossing dots</label>
         </div>
+        <div class="row toggles" data-for="asymptotic conjugate geodesicBoth chebyshev" id="panels-row">
+          <label class="chk" title="The panels between the laths (Net Topology → Mesh), coloured by how skew each one is: the distance between its diagonals over the mean diagonal (Zadravec, Schiftner & Wallner 2010) — red from 0.01. Curvature lines are a conjugate net and give panels planar to second order (Liu et al. 2006); asymptotic nets the skewest ones"><input id="panels" type="checkbox"> panels · planarity</label>
+          <label class="chk" id="panels-fix-row" title="Hold the nodes on the net's boundary while planarizing"><input id="panels-fixborder" type="checkbox"> hold the border</label>
+          <button id="planarize" class="btn" title="Planarize Mesh on the panel mesh: every node moves to the best-fit planes of its panels until every panel is flat — a conjugate net barely moves, an asymptotic net has to leave the surface">planarize</button>
+        </div>
+        <p id="panels-stats" class="stats hidden"></p>
         <div class="row toggles" data-for="geodesic geodesicBoth">
           <label class="chk"><input id="jacobi" type="checkbox" checked> Jacobi start angles <span class="unit">even strips</span></label>
           <label class="chk"><input id="fromborder" type="checkbox"> from the border</label>
@@ -172,6 +185,28 @@
       </div>
     </section>
 
+    <section class="block" id="pieces-block">
+      <h2>Pieces <small>stock lengths, splices, joints</small></h2>
+      <div class="gh"><img src="icons/LathSegment.png" alt="" title="Lath Segment"><img src="icons/NetJoints.png" alt="" title="Net Joints"><span>Grasshopper <b>Lath Segment</b> · <b>Net Joints</b></span></div>
+      <div class="grid2">
+        <div class="row slider"><label for="pstock" title="The length the timber comes in: 6 m factory lengths at the Downland and Savill gridshells, finger-jointed from 0.3–1.4 m pieces (Harris &amp; Roynon 2008)">stock length <span class="unit">m</span></label><input id="pstock" type="range" min="1" max="13" step="0.5" value="6"><output for="pstock">6</output></div>
+        <div class="row slider"><label for="psplice" title="Lath Segment → SpliceLength: consecutive pieces lap over this length, half-lap notched (0 = a plain butt at the cut)">splice <span class="unit">mm</span></label><input id="psplice" type="range" min="0" max="600" step="10" value="300"><output for="psplice">300</output></div>
+        <div class="row slider"><label for="pmargin" title="Lath Segment → Margin: no cut within this distance of a joint on the lath">joint margin <span class="unit">mm</span></label><input id="pmargin" type="range" min="0" max="500" step="10" value="150"><output for="pmargin">150</output></div>
+        <div class="row slider"><label for="pkerf" title="The width a saw cut takes from a board between two pieces">kerf <span class="unit">mm</span></label><input id="pkerf" type="range" min="0" max="10" step="0.5" value="3"><output for="pkerf">3</output></div>
+      </div>
+      <div class="row toggles">
+        <label class="chk" title="Lath Segment → Balance: the fewest pieces that fit the stock, made equal, instead of full stock lengths and a short remainder at the end of each lath. Equal pieces usually cost boards: the material figure tells"><input id="pbalance" type="checkbox"> equal pieces per lath</label>
+        <label class="chk" title="Net Joints → NotchesA / NotchesB and Lath Segment → Ne / Ns as solids in the viewport: the half-lap notch at every crossing, the half-lap splice at every cut"><input id="pnotches" type="checkbox"> show the notches</label>
+      </div>
+      <div class="row"><button id="piecesrun" class="btn" title="Grasshopper: Lath Segment with the Points of Net Joints as its Joints">Cut the laths</button><span class="unit">on the current net, with the Laths section</span></div>
+      <div id="pieces-result" class="hidden">
+        <p id="pieces-stats" class="stats"></p>
+        <div class="q"><div class="q-h">boards <span id="pieces-boards-txt"></span></div><canvas id="pieces-boards" class="boards"></canvas><div class="caption">one row per stock board, pieces in their family colour, kerfs black, offcut grey · first-fit decreasing (Johnson 1973; within 11/9 of the optimum, Dósa 2007)</div></div>
+        <div id="pieces-legend" class="legend"></div>
+      </div>
+      <p class="note">Every lath is cut into pieces no longer than the stock, the cuts kept the margin away from the joints (a splice on a joint is a joint with no timber left); the pieces of the whole net are then cut from boards. At 1 : 1 the stock is the timber you buy; the material figure is what ends up in the laths.</p>
+    </section>
+
     <section class="block" id="structure-block">
       <h2>Structure <small>beam frame of the net</small></h2>
       <div class="gh"><img src="icons/GridshellAnalysis.png" alt="" title="Gridshell Analysis"><span>Grasshopper <b>Gridshell Analysis</b></span></div>
@@ -206,9 +241,14 @@
       <div class="row"><button id="kinrun" class="btn">Run the motion</button><span class="unit">on the current asymptotic net — use a coarse spacing</span></div>
       <div id="kin-result" class="hidden">
         <div class="row slider"><label for="kfold">fold</label><input id="kfold" type="range" min="0" max="10" step="1" value="0"><output for="kfold">0</output><button id="kplay" class="ghost small">play</button></div>
+        <div class="row"><span class="unit">lath colour</span><div class="chips small" id="kcolour" role="radiogroup" aria-label="lath colour during the motion">
+          <button data-kc="state" class="on" title="Peak strain utilization of each lath in the state on screen — it changes as you move the fold slider">strain now</button>
+          <button data-kc="envelope" title="Peak strain utilization of each lath over every state of the motion: what the lath must survive to be moved at all">envelope</button>
+          <button data-kc="off" title="Family colours">family</button>
+        </div></div>
         <p id="kin-stats" class="stats"></p>
         <canvas id="kin-plot" class="plot" height="110"></canvas>
-        <div class="caption">along the fold: height (ink), smallest crossing angle (A), peak strain utilization (B)</div>
+        <div class="caption" id="kin-caption">along the fold — line: peak strain utilization (dashed: the limit 1); shaded: strain energy Π split into bending (A colour) and twist (B colour) on one scale; dot: natural state (least Π)</div>
       </div>
       <p id="kin-note" class="note">Hinges keep the joint spacing and stay normal to the laths; the laths keep their rest bend as far as the stiffness asks (Schikore et al. 2020; Wan, Crolla &amp; Schling 2025). <b>Press flat</b> at amplitude 1 lays the net on the seed's tangent plane: the 3-fold Enneper web folds into a hexagon — the laths bend in the plane around the six rays and the scissors close towards the rim. Scrub the fold back from 1 to 0 to watch the flat grid deploy.</p>
     </section>
@@ -222,11 +262,13 @@
         <div class="row slider"><label for="kwidth">strip <span class="unit">mm</span></label><input id="kwidth" type="range" min="4" max="120" step="1" value="20"><output for="kwidth">20</output></div>
         <div class="row slider"><label for="kthick">sheet <span class="unit">mm</span></label><input id="kthick" type="range" min="0.5" max="12" step="0.5" value="3"><output for="kthick">3</output></div>
       </div>
+      <div class="row"><label for="khub" title="Where three or more laths end at one node (the flat point of a 3-fold Enneper web): a common pin hole, or a laser-cut plate with a radial slot per strip">hub</label><select id="khub"><option value="0">pin hole on every strip</option><option value="1">one hub plate (inner edge)</option><option value="2" selected>two hub plates, bolted</option></select></div>
       <div class="row"><label for="kjoint">joints</label><select id="kjoint"><option value="0" title="slots for upright laths, pins for flat ones">automatic</option><option value="1" title="the strips slot into each other and turn about the normal">halving slots</option><option value="2">pin holes</option></select></div>
       <div class="grid2">
         <div class="row slider"><label for="ksheetw">laser bed <span class="unit">mm</span></label><input id="ksheetw" type="number" min="100" max="5000" step="10" value="1000"><span class="unit">×</span><input id="ksheeth" type="number" min="100" max="5000" step="10" value="600"></div>
         <div class="row slider"><label for="kclear">clearance <span class="unit">mm</span></label><input id="kclear" type="range" min="0" max="2" step="0.05" value="0.2"><output for="kclear">0.2</output></div>
       </div>
+      <div class="row"><label class="chk" title="A strip longer than the bed lies along its diagonal when it fits there; otherwise it is split into pieces lapped between two joints, with two pin holes per lap. Off: such strips go on a drawing of their own, for a longer bed."><input id="ksplit" type="checkbox" checked> split long strips with a lap (Splice) when the diagonal is too short</label></div>
       <div class="row"><button id="kitrun" class="btn">Build the kit</button><button id="kitzip" class="ghost small hidden">download the kit (.zip)</button></div>
       <div id="kit-result" class="hidden">
         <p id="kit-stats" class="stats"></p>

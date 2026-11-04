@@ -1,7 +1,9 @@
 // three.js viewport: the analysed mesh with per-vertex colours or a zebra
 // shader, curve families as fat lines, crossing points, umbilics, principal
 // direction glyphs, a selected lath (with optional swept solid), the
-// deformed net, and draggable loft control points.
+// deformed net, draggable loft control points, coloured net cells (the
+// Chebyshev angle map) and HTML text labels pinned to surface points
+// (isocurve levels), hidden while the surface is in front of them.
 
 import * as THREE from 'three';
 import { OrbitControls } from '../vendor/OrbitControls.js';
@@ -14,7 +16,7 @@ import { LineSegmentsGeometry } from '../vendor/lines/LineSegmentsGeometry.js';
 // kempff/seleme palette: black, white and neon
 export const FAMILY_A = 0x2a3cff; // neon blue
 export const FAMILY_B = 0xff1f4f; // neon red
-export const FAMILY_G = 0x00d86b; // neon green (geodesic diagonals)
+export const FAMILY_G = 0x00a653; // neon green (geodesic diagonals) — Mite.Core MitePalette.FamilyG(Light), 3.2:1 on white
 export const NEON = { blue: 0x2a3cff, red: 0xff1f4f, green: 0x00d86b, yellow: 0xd9ff00 };
 
 export class Viewer {
@@ -59,6 +61,9 @@ export class Viewer {
     this.dirHandle = null;
     this.raycaster = new THREE.Raycaster();
     this.raycaster.params.Line2 = { threshold: 6 };
+    this.labels = []; // {p: Vector3, el, visible}
+    this.labelLayer = null;
+    this._labelTick = 0;
     this.pointer = new THREE.Vector2();
     this.dragging = null;
     this.dark = false;
@@ -94,6 +99,7 @@ export class Viewer {
   render() {
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+    if (this.labels.length) this._placeLabels();
   }
 
   // ---- mesh ---------------------------------------------------------------
@@ -275,6 +281,10 @@ export class Viewer {
     for (const c of rm) { this.overlayGroup.remove(c); c.geometry?.dispose(); }
   }
 
+  setOverlayVisible(tag, visible) {
+    for (const c of this.overlayGroup.children) if (c.userData.tag === tag) c.visible = visible;
+  }
+
   showPoints(tag, flat, color, size, colors = null) {
     this.clearOverlay(tag);
     if (!flat || !flat.length) return;
@@ -379,6 +389,119 @@ export class Viewer {
     const mesh = new THREE.Mesh(g, m);
     mesh.userData.tag = tag;
     this.overlayGroup.add(mesh);
+  }
+
+  /**
+   * Polygon faces with one colour each (fan-triangulated, vertices duplicated per face so the
+   * colour is flat), slightly see-through so the laths underneath stay visible; a thin outline
+   * per face marks the panel edges.
+   */
+  showFaces(tag, vertices, faces, colors, opacity = 0.85) {
+    this.clearOverlay(tag); this.clearOverlay(tag + 'Edges');
+    if (!vertices?.length || !faces?.length) return;
+    const pos = [], col = [], edges = [], idx = [];
+    for (let f = 0; f < faces.length; f++) {
+      const ring = faces[f], c = colors[f] || [0.5, 0.5, 0.5];
+      const base = pos.length / 3;
+      for (const vi of ring) { pos.push(vertices[3 * vi], vertices[3 * vi + 1], vertices[3 * vi + 2]); col.push(c[0], c[1], c[2]); }
+      for (let k = 0; k < ring.length; k++) {
+        const a = ring[k], b = ring[(k + 1) % ring.length];
+        edges.push(vertices[3 * a], vertices[3 * a + 1], vertices[3 * a + 2], vertices[3 * b], vertices[3 * b + 1], vertices[3 * b + 2]);
+      }
+      for (let k = 1; k + 1 < ring.length; k++) idx.push(base, base + k, base + k + 1);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(Float32Array.from(pos), 3));
+    g.setAttribute('color', new THREE.BufferAttribute(Float32Array.from(col), 3));
+    g.setIndex(new THREE.BufferAttribute(Uint32Array.from(idx), 1));
+    g.computeVertexNormals();
+    const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide, transparent: opacity < 0.999, opacity, depthWrite: opacity >= 0.999 });
+    const mesh = new THREE.Mesh(g, m);
+    mesh.userData.tag = tag; mesh.renderOrder = 5;
+    this.overlayGroup.add(mesh);
+    this.showSegments(tag + 'Edges', edges, this.ink(), 0.8);
+  }
+
+  /**
+   * Net cells coloured per node: flat xyz nodes, four node indices per cell
+   * (counter-clockwise), one [r, g, b] per node. Drawn as two triangles per
+   * cell, double-sided, pushed in front of the surface.
+   */
+  showCells(tag, nodes, quads, colors) {
+    this.clearOverlay(tag);
+    if (!nodes?.length || !quads?.length) return;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(Float32Array.from(nodes), 3));
+    const idx = [];
+    for (let q = 0; q + 3 < quads.length; q += 4) {
+      const a = quads[q], b = quads[q + 1], c = quads[q + 2], d = quads[q + 3];
+      idx.push(a, b, c, a, c, d);
+    }
+    g.setIndex(idx);
+    const col = new Float32Array(nodes.length);
+    for (let i = 0; i < nodes.length / 3; i++) { const c = colors[i] || [0.6, 0.6, 0.6]; col[3 * i] = c[0]; col[3 * i + 1] = c[1]; col[3 * i + 2] = c[2]; }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.computeVertexNormals();
+    // the cells are chords of the surface and sag below it by up to κL²/8: a large depth
+    // offset keeps them in front; a little transparency keeps the laths readable
+    const m = new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.8, metalness: 0, transparent: true, opacity: 0.88, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -400 });
+    const mesh = new THREE.Mesh(g, m);
+    mesh.userData.tag = tag;
+    this.overlayGroup.add(mesh);
+  }
+
+  /**
+   * Text labels pinned to surface points: items = [{p: [x, y, z], text}].
+   * HTML elements in a layer over the canvas, re-projected every frame; a
+   * label whose point is hidden behind the surface is faded (occlusion by a
+   * ray from the camera, re-tested a few times a second while the view moves).
+   */
+  showLabels(tag, items) {
+    this.clearLabels(tag);
+    if (!items?.length) return;
+    if (!this.labelLayer) {
+      this.labelLayer = document.createElement('div');
+      this.labelLayer.className = 'labels';
+      this.canvas.parentElement.appendChild(this.labelLayer);
+    }
+    for (const it of items) {
+      const el = document.createElement('span');
+      el.className = 'label';
+      el.textContent = it.text;
+      this.labelLayer.appendChild(el);
+      this.labels.push({ tag, p: new THREE.Vector3(it.p[0], it.p[1], it.p[2]), el, occluded: false, checked: null });
+    }
+    this._placeLabels(true);
+  }
+
+  clearLabels(tag) {
+    const keep = [];
+    for (const l of this.labels) { if (tag && l.tag !== tag) keep.push(l); else l.el.remove(); }
+    this.labels = keep;
+  }
+
+  _placeLabels(force = false) {
+    const r = this.canvas.getBoundingClientRect();
+    const camPos = this.camera.position;
+    const now = performance.now();
+    const occlude = this.mesh && (force || now - this._labelTick > 150);
+    if (occlude) this._labelTick = now;
+    const v = new THREE.Vector3(), dir = new THREE.Vector3();
+    for (const l of this.labels) {
+      v.copy(l.p).project(this.camera);
+      const behind = v.z > 1 || v.z < -1;
+      if (occlude) {
+        dir.copy(l.p).sub(camPos);
+        const dist = dir.length(); dir.divideScalar(dist);
+        this.raycaster.set(camPos, dir);
+        const hit = this.raycaster.intersectObject(this.mesh, false)[0];
+        l.occluded = !!hit && hit.distance < dist - 1e-3 * this.sceneRadius;
+      }
+      const x = (v.x * 0.5 + 0.5) * r.width, y = (-v.y * 0.5 + 0.5) * r.height;
+      l.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      l.el.style.display = behind ? 'none' : '';
+      l.el.classList.toggle('dim', l.occluded);
+    }
   }
 
   /** Principal direction glyphs: short segments along d1 (teal) and d2 (plum) at a subset of vertices */
